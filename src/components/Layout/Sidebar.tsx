@@ -1,6 +1,65 @@
 import { ArrowRight, Database, History, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// mockData
+
+const data: QuestionHistory = {
+  questions: [
+    {
+      id: "11ca0168-b0dd-42a6-8f35-a89b90aad6f4",
+      question: "onde fica o menu para emitir NF em lote no sistema Agrotis?",
+    },
+    {
+      id: "51c12c9b-217f-4956-aac6-0dbafe5f04b8",
+      question: "me apresente um SQL de cancelamento de pedido",
+    },
+    {
+      id: "e9d3f6d7-823d-4dbe-9136-9163b034cabf",
+      question:
+        "Quais são os pedidos que foram cancelados e quantos produtos estão ativos no sistema hoje?",
+    },
+    {
+      id: "9a1f7a7d-b2b7-4af8-889f-dc4731cf4bee",
+      question: "quantos produtos temos ativos no sistema?",
+    },
+    {
+      id: "8c917233-0d58-4a35-88fd-fb018dd0102b",
+      question:
+        "Quantos produtos ativos temos no sistema considerando apenas as informações da tabela PRODUTO?",
+    },
+    {
+      id: "c2cd8e39-3b33-4880-8143-e999c95deb26",
+      question: "Quantos produtos temos inativos no sistema hoje?",
+    },
+    {
+      id: "7be43d01-46b1-411b-b0a7-cb91d53ed266",
+      question:
+        "Quantos produtos temos inativos no sistema hoje e qual foi o ultimo valor de venda do produto com o código 123?",
+    },
+    {
+      id: "15a4ad94-581e-4dee-81df-57d6d236fd0a",
+      question:
+        "Quais são os detalhes de todas as transações emitidas com tipos de transação específicos, código de transporte nulo e situação 3, que ocorreram em ou após 15 de janeiro de 2025?",
+    },
+    {
+      id: "7818a9e5-6d5c-4386-9909-4a5c32a2a079",
+      question: "Select all",
+    },
+  ],
+  type: "question_history",
+};
+
+// Definindo a interface para o tipo de dados
+interface Question {
+  id: string;
+  question: string;
+}
+
+interface QuestionHistory {
+  questions: Question[];
+  type: string;
+}
+
 const listMenu = [
   {
     name: "Nova conversa",
@@ -58,11 +117,22 @@ export default function Sidebar() {
         )}
       </div>
       <hr className="w-full border-gray-300 " />
-      <div className="w-full h-[50%] overflow-y-auto  flex flex-col gap-6 my-4 text-black ">
+      <div className="w-full h-fit  flex flex-col gap-6 my-4 text-black ">
         <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
           <History size={20} />
           Conversas Recentes
         </span>
+        <div className="w-full flex flex-col gap-2 overflow-y-auto font-inter">
+          {data.questions?.map((item) => (
+            <Link
+              key={item.id}
+              to={`/chat/${item.id}`}
+              className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300"
+            >
+              <span className="text-sm line-clamp-1">{item.question}</span>
+            </Link>
+          ))}
+        </div>
       </div>{" "}
       <hr className="w-full border-gray-300 mt-auto" />
       <div className="w-full py-4 flex items-center gap-2 justify-between px-2">

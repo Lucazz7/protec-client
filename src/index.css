@@ -28,3 +28,21 @@ body {
   --font-inter: "Inter", sans-serif;
   --font-orbitron: "Orbitron", sans-serif;
 }
+
+::-webkit-scrollbar {
+  height: 4px;
+  width: 5px;
+  border-radius: 8px;
+  background: #151517d9;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #979797;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a3a4a8d9;
+}
