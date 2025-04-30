@@ -1,4 +1,12 @@
-import { ArrowRight, Database, History, Plus, User } from "lucide-react";
+import {
+  ArrowRight,
+  Database,
+  History,
+  Menu,
+  Plus,
+  User,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 // mockData
@@ -105,76 +113,100 @@ const listMenu = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   return (
-    <div className="w-80 bg-[#ffffff75] h-full  rounded-2xl flex flex-col items-center p-3 transition-all duration-300">
-      <div className="w-full flex gap-2 items-center relative py-2">
+    <div
+      className={`lg:w-80 bg-[#ffffff75] lg:h-full rounded-2xl flex flex-col items-center  transition-all duration-300 p-3  z-50 ${
+        isOpen
+          ? "w-[calc(100%-2rem)] h-[calc(100%-2rem)] bg-white  absolute"
+          : "h-20"
+      }`}
+    >
+      <div className="w-full flex flex-row-reverse lg:flex-row gap-2 items-center relative py-2 px-3">
         <img
           src="/image/svg/fav-icon-biofy.svg"
           alt="logo"
-          className="h-14 dark:invert cursor-pointer "
+          className="h-10 lg:h-14 invert cursor-pointer "
         />
-        <div className="flex w-full items-center">
+        <div className="hidden lg:flex w-full items-center">
           <span className="text-2xl font-semibold text-gray-700">Protec</span>
           <span className="text-sm text-gray-500 pt-11 -ms-4 -mt-2">
             AI Chatbot
           </span>
         </div>
-        <span className="text-sm text-gray-500 absolute right-0 top-0">
+        <span className="hidden lg:flex text-sm text-gray-500 absolute right-0 top-0">
           v1.0.0
         </span>
-      </div>
-      <hr className="w-full border-gray-300 mt-5" />
-      <div className="w-full flex flex-col gap-6 my-4 text-gray-500">
-        {listMenu.map((item, index) =>
-          item.name === "Nova conversa" ? (
-            <Link
-              key={index}
-              to={item.path}
-              className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2  rounded-lg transition-all duration-300`}
-            >
-              {item.icon}
-              <span className="text- uppercase">{item.name}</span>
-            </Link>
-          ) : (
-            <Link
-              key={index}
-              to={item.path}
-              className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300`}
-            >
-              {item.icon}
-              <span className="text-base">{item.name}</span>
-            </Link>
-          )
-        )}
-      </div>
-      <hr className="w-full border-gray-300 " />
-      <div className="w-full h-[calc(79%-150px)] flex flex-col gap-4 my-4 text-black ">
-        <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
-          <History size={20} />
-          Conversas Recentes
-        </span>
-        <div className="w-full flex flex-col h-full overflow-y-auto font-inter p-2">
-          {data.questions?.map((item) => (
-            <Link
-              key={item.id}
-              to={`/chat/${item.id}`}
-              className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
-            >
-              <span className="text-sm line-clamp-1 text">
-                {item.question.charAt(0).toUpperCase() + item.question.slice(1)}
-              </span>
-            </Link>
-          ))}
+        <div
+          className="flex lg:hidden items-center cursor-pointer me-auto"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </div>
-      </div>{" "}
-      <hr className="w-full border-gray-300 mt-auto" />
-      <div className="w-full py-4 flex items-center gap-2 justify-between px-2">
-        <div className="w-auto p-2 bg-gray-300 rounded-full">
-          <User size={20} />
+      </div>
+      <div
+        className={`h-full ${
+          isOpen ? "flex flex-col" : "hidden lg:flex lg:flex-col "
+        }`}
+      >
+        <hr className="w-full border-gray-300 mt-5" />
+        <div className="w-full flex flex-col gap-6 my-4 text-gray-500">
+          {listMenu.map((item, index) =>
+            item.name === "Nova conversa" ? (
+              <Link
+                key={index}
+                to={item.path}
+                className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2  rounded-lg transition-all duration-300`}
+              >
+                {item.icon}
+                <span className="text- uppercase">{item.name}</span>
+              </Link>
+            ) : (
+              <Link
+                key={index}
+                to={item.path}
+                className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300`}
+              >
+                {item.icon}
+                <span className="text-base">{item.name}</span>
+              </Link>
+            )
+          )}
         </div>
-        <span className="text-gray-700 font-semibold">Protec AI Chatbot</span>
-        <ArrowRight size={18} className="text-gray-500 cursor-pointer" />
+        <hr className="w-full border-gray-300 " />
+        <div className="w-full h-full md:h-[calc(79%-10rem)] overflow-y-auto flex flex-col gap-4 my-4 text-black ">
+          <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
+            <History size={20} />
+            Conversas Recentes
+          </span>
+          <div className="w-full flex flex-col h-full max-h-72 md:max-h-[55lvh] overflow-y-auto font-inter p-2">
+            {data.questions?.map((item) => (
+              <Link
+                key={item.id}
+                to={`/chat/${item.id}`}
+                className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
+              >
+                <span className="text-sm line-clamp-1 text">
+                  {item.question.charAt(0).toUpperCase() +
+                    item.question.slice(1)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>{" "}
+        <hr className="w-full border-gray-300 mt-auto" />
+        <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
+          <div className="w-auto p-2 bg-gray-300 rounded-full">
+            <User size={20} />
+          </div>
+          <span className="text-gray-700 font-semibold">Protec AI Chatbot</span>
+          <ArrowRight size={18} className="text-gray-500 cursor-pointer" />
+        </div>
       </div>
     </div>
   );
