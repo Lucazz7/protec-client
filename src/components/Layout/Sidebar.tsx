@@ -19,30 +19,62 @@ const data: QuestionHistory = {
         "Quais são os pedidos que foram cancelados e quantos produtos estão ativos no sistema hoje?",
     },
     {
-      id: "9a1f7a7d-b2b7-4af8-889f-dc4731cf4bee",
+      id: "9a1f7a7d-b2b7-4af8-889f-dc4731cf4beesdfsd",
       question: "quantos produtos temos ativos no sistema?",
     },
     {
-      id: "8c917233-0d58-4a35-88fd-fb018dd0102b",
+      id: "8c917233-0d58-4a35-88fd-fb018dd0102bsdf",
       question:
         "Quantos produtos ativos temos no sistema considerando apenas as informações da tabela PRODUTO?",
     },
     {
-      id: "c2cd8e39-3b33-4880-8143-e999c95deb26",
+      id: "c2cd8e39-3b33-4880-8143-e999c95deb26dasf",
       question: "Quantos produtos temos inativos no sistema hoje?",
     },
     {
-      id: "7be43d01-46b1-411b-b0a7-cb91d53ed266",
+      id: "7be43d01-46b1-411b-b0a7-cb91d53ed266dfdf",
       question:
         "Quantos produtos temos inativos no sistema hoje e qual foi o ultimo valor de venda do produto com o código 123?",
     },
     {
-      id: "15a4ad94-581e-4dee-81df-57d6d236fd0a",
+      id: "15a4ad94-581e-4dee-81df-57d6d236fd0afgg",
       question:
         "Quais são os detalhes de todas as transações emitidas com tipos de transação específicos, código de transporte nulo e situação 3, que ocorreram em ou após 15 de janeiro de 2025?",
     },
     {
-      id: "7818a9e5-6d5c-4386-9909-4a5c32a2a079",
+      id: "7818a9e5-6d5c-4386-9909-4a5c32a2a079sds",
+      question: "Select all",
+    },
+    {
+      id: "c2cd8e39-3b33-4880-8143-e999c95deb26sdsd",
+      question: "Quantos produtos temos inativos no sistema hoje?",
+    },
+    {
+      id: "7be43d01-46b1-411b-b0a7-cb91d53ed266sdsd",
+      question:
+        "Quantos produtos temos inativos no sistema hoje e qual foi o ultimo valor de venda do produto com o código 123?",
+    },
+    {
+      id: "15a4ad94-581e-4dee-81df-57d6d236fd0asd",
+      question:
+        "Quais são os detalhes de todas as transações emitidas com tipos de transação específicos, código de transporte nulo e situação 3, que ocorreram em ou após 15 de janeiro de 2025?",
+    },
+    {
+      id: "7818a9e5-6d5c-4386-9909-4a5c32a2a079dfs",
+      question: "Select all",
+    },
+    {
+      id: "7be43d01-46b1-411b-b0a7-cb91d53ed266ew",
+      question:
+        "Quantos produtos temos inativos no sistema hoje e qual foi o ultimo valor de venda do produto com o código 123?",
+    },
+    {
+      id: "15a4ad94-581e-4dee-81df-57d6d236fd0a34",
+      question:
+        "Quais são os detalhes de todas as transações emitidas com tipos de transação específicos, código de transporte nulo e situação 3, que ocorreram em ou após 15 de janeiro de 2025?",
+    },
+    {
+      id: "7818a9e5-6d5c-4386-9909-4a5c32a2a07934",
       question: "Select all",
     },
   ],
@@ -117,19 +149,21 @@ export default function Sidebar() {
         )}
       </div>
       <hr className="w-full border-gray-300 " />
-      <div className="w-full h-fit  flex flex-col gap-6 my-4 text-black ">
+      <div className="w-full h-[calc(79%-150px)] flex flex-col gap-4 my-4 text-black ">
         <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
           <History size={20} />
           Conversas Recentes
         </span>
-        <div className="w-full flex flex-col gap-2 overflow-y-auto font-inter">
+        <div className="w-full flex flex-col h-full overflow-y-auto font-inter p-2">
           {data.questions?.map((item) => (
             <Link
               key={item.id}
               to={`/chat/${item.id}`}
-              className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300"
+              className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
             >
-              <span className="text-sm line-clamp-1">{item.question}</span>
+              <span className="text-sm line-clamp-1 text">
+                {item.question.charAt(0).toUpperCase() + item.question.slice(1)}
+              </span>
             </Link>
           ))}
         </div>
