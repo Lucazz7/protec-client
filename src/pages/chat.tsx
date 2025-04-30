@@ -199,10 +199,9 @@ export default function Chat() {
           </div>
         </div>
         {/* Chat Area */}
-        {/* Mensagem enviada */}
         {isSubmitted && (
           <div className="w-full h-[calc(100%-15rem)] overflow-y-auto  mx-auto">
-            <div className="mx-auto w-full max-w-3xl mb-6 space-y-6 font-sans ">
+            <div className="mx-auto w-full max-w-3xl mb-6 space-y-6 font-inter text-sm">
               {chatHistory.map((chat, index) => (
                 <div
                   key={index}
@@ -222,7 +221,7 @@ export default function Chat() {
 
               {isLoading && (
                 <div className="flex justify-center items-center ">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800 my-6"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-800 my-6"></div>
                 </div>
               )}
             </div>
