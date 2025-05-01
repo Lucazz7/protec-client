@@ -121,13 +121,17 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   return (
     <div
-      className={`lg:w-80 bg-[#ffffff75] lg:h-full rounded-2xl flex flex-col items-center  transition-all duration-300 p-3  z-50 ${
+      className={`lg:w-80 bg-[#ffffff75] lg:h-full rounded-2xl flex flex-col items-center transition-all duration-300 p-3  z-50 ${
         isOpen
-          ? "w-[calc(100%-2rem)] h-[calc(100%-2rem)] bg-white  absolute"
-          : "h-20"
+          ? "w-[calc(100%-1rem)] h-[calc(100%-1rem)] bg-white absolute"
+          : "h-[80px]"
       }`}
     >
-      <div className="w-full flex flex-row-reverse lg:flex-row gap-2 items-center relative py-2 px-3">
+      <div
+        className={`${
+          isOpen ? "h-[10%]" : "h-full"
+        } w-full md:h-[10%] flex flex-row-reverse lg:flex-row gap-2 items-center relative py-2 px-3`}
+      >
         <img
           src="/image/svg/fav-icon-biofy.svg"
           alt="logo"
@@ -150,62 +154,70 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </div>
       </div>
       <div
-        className={`h-full ${
-          isOpen ? "flex flex-col" : "hidden lg:flex lg:flex-col "
+        className={`h-[calc(100%-10%)] ${
+          isOpen ? "flex flex-col" : "hidden lg:flex lg:flex-col"
         }`}
       >
-        <hr className="w-full border-gray-300 mt-5" />
-        <div className="w-full flex flex-col gap-6 my-4 text-gray-500">
-          {listMenu.map((item, index) =>
-            item.name === "Nova conversa" ? (
-              <Link
-                key={index}
-                to={item.path}
-                className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2  rounded-lg transition-all duration-300`}
-              >
-                {item.icon}
-                <span className="text- uppercase">{item.name}</span>
-              </Link>
-            ) : (
-              <Link
-                key={index}
-                to={item.path}
-                className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300`}
-              >
-                {item.icon}
-                <span className="text-base">{item.name}</span>
-              </Link>
-            )
-          )}
+        <div className="w-full md:h-[15%] flex flex-col py-2 ">
+          <hr className="w-full border-gray-300 pb-2" />
+          <div className="w-full h-full flex flex-col gap-6  text-gray-500 ">
+            {listMenu.map((item, index) =>
+              item.name === "Nova conversa" ? (
+                <Link
+                  key={index}
+                  to={item.path}
+                  className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2  rounded-lg transition-all duration-300`}
+                >
+                  {item.icon}
+                  <span className="text- uppercase">{item.name}</span>
+                </Link>
+              ) : (
+                <Link
+                  key={index}
+                  to={item.path}
+                  className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300`}
+                >
+                  {item.icon}
+                  <span className="text-base">{item.name}</span>
+                </Link>
+              )
+            )}
+          </div>
         </div>
-        <hr className="w-full border-gray-300 " />
-        <div className="w-full h-full md:h-[calc(79%-10rem)] overflow-y-auto flex flex-col gap-4 my-4 text-black ">
-          <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
-            <History size={20} />
-            Conversas Recentes
-          </span>
-          <div className="w-full flex flex-col h-full max-h-72 md:max-h-[55lvh] overflow-y-auto font-inter p-2">
-            {data.questions?.map((item) => (
-              <Link
-                key={item.id}
-                to={`/chat/${item.id}`}
-                className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
-              >
-                <span className="text-sm line-clamp-1 text">
-                  {item.question.charAt(0).toUpperCase() +
-                    item.question.slice(1)}
-                </span>
-              </Link>
-            ))}
+        <div className="w-full h-[70%] md:h-[80%] flex flex-col">
+          <hr className="w-full border-gray-300 " />
+          <div className="w-full h-full  overflow-y-auto flex flex-col gap-4 my-4 text-black ">
+            <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
+              <History size={20} />
+              Conversas Recentes
+            </span>
+            <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2">
+              {data.questions?.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/chat/${item.id}`}
+                  className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
+                >
+                  <span className="text-sm line-clamp-1 text">
+                    {item.question.charAt(0).toUpperCase() +
+                      item.question.slice(1)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>{" "}
+        </div>
+        <div className="w-full flex flex-col mt-auto ">
+          <hr className="w-full border-gray-300" />
+          <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
+            <div className="w-auto p-2 bg-gray-300 rounded-full">
+              <User size={20} />
+            </div>
+            <span className="text-gray-700 font-semibold">
+              Protec AI Chatbot
+            </span>
+            <ArrowRight size={18} className="text-gray-500 cursor-pointer" />
           </div>
-        </div>{" "}
-        <hr className="w-full border-gray-300 mt-auto" />
-        <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
-          <div className="w-auto p-2 bg-gray-300 rounded-full">
-            <User size={20} />
-          </div>
-          <span className="text-gray-700 font-semibold">Protec AI Chatbot</span>
-          <ArrowRight size={18} className="text-gray-500 cursor-pointer" />
         </div>
       </div>
     </div>

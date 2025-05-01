@@ -82,9 +82,9 @@ export default function Chat() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col font-inter  ">
+    <div className="w-full h-full flex flex-col font-inter">
       {isSubmitted && (
-        <div className="w-full p-4 flex justify-between items-center gap-4  rounded-t-2xl relative shadow-sm">
+        <div className="w-full min-[400px]:h-[20%] md:h-auto p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
           <span className="text-base text-gray-500 flex items-center gap-2">
             <Cpu size={22} /> Seu copiloto com tecnologia de IA para consultas
             SQL
@@ -112,10 +112,16 @@ export default function Chat() {
           </div>
         </div>
       )}
-      <div className="w-full h-full  mx-auto flex flex-col justify-center gap-7 px-2">
+      <div
+        className={`w-full md:my-auto ${
+          isSubmitted
+            ? "h-[70%] min-[400px]:h-[80%] md:h-full"
+            : "h-full md:h-auto"
+        } mx-auto flex flex-col py-4 md:py-0 md:justify-center gap-2 md:gap-7 md:px-2`}
+      >
         {/* Header */}
         <div
-          className={`mx-auto w-full max-w-3xl flex flex-col items-center justify-center transition-all duration-500 overflow-hidden
+          className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center  transition-all duration-500 overflow-hidden
             ${
               isSubmitted
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"
@@ -123,27 +129,28 @@ export default function Chat() {
             }
           `}
         >
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-semibold mb-1">
+          <div className="text-center mb-2 md:mb-8 p-2">
+            <h1 className="text-base min-[400px]:text-xl lg:text-2xl md:text-4xl font-semibold mb-1">
               <GradientText
-                text="Explore o poder do "
-                gradientText="SQL Inteligente"
+                text="Explore o poder da"
+                gradientText="Inteligência Artificial"
                 gradientColors="from-pink-600 to-blue-800"
               />
             </h1>
-            <h2 className="text-3xl font-semibold mb-4">
+            <h2 className="text-base min-[400px]:text-xl lg:text-2xl md:text-3xl font-semibold mb-2 md:mb-4">
               <GradientText
                 text="Otimize suas"
                 gradientText=" consultas"
                 gradientColors="from-blue-800 to-pink-600"
               />
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-sm sm:text-base md:text-base">
               Transforme seus dados em resultados eficientes
             </p>
           </div>
+
           {/* Prompt Suggestions */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 p-2 my-auto">
             <div
               className="bg-white p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 hover:scale-105 transition-all duration-300 cursor-pointer"
               onClick={() =>
@@ -200,7 +207,7 @@ export default function Chat() {
         </div>
         {/* Chat Area */}
         {isSubmitted && (
-          <div className="w-full h-[calc(100%-15rem)] overflow-y-auto  mx-auto">
+          <div className="w-full h-[75%] overflow-y-auto  mx-auto px-2 md:px-0">
             <div className="mx-auto w-full max-w-3xl mb-6 space-y-6 font-inter text-sm">
               {chatHistory.map((chat, index) => (
                 <div
@@ -228,7 +235,11 @@ export default function Chat() {
           </div>
         )}
         {/* Input do chat */}
-        <div className="w-full max-w-3xl mx-auto mb-4">
+        <div
+          className={`w-full h-[25%] max-w-3xl mx-auto ${
+            isSubmitted ? "mb-4" : "md:mb-4"
+          } px-2 mt-auto`}
+        >
           <ChatInput
             message={message}
             onInputChange={handleInputChange}
