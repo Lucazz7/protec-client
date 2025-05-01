@@ -130,7 +130,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       <div
         className={`${
           isOpen ? "h-[10%]" : "h-full"
-        } w-full md:h-[10%] flex flex-row-reverse lg:flex-row gap-2 items-center relative py-2 px-3`}
+        } w-full lg:h-[10%] flex flex-row-reverse lg:flex-row gap-2 items-center relative py-2 px-3`}
       >
         <img
           src="/image/svg/fav-icon-biofy.svg"
