@@ -8,7 +8,7 @@ import { useRef } from "react";
 interface ChatInputProps {
   message: string;
   isLoading: boolean;
-  onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
   onSendMessage: () => void;
   onClearMessage: () => void;
 }
@@ -16,7 +16,7 @@ interface ChatInputProps {
 export default function ChatInput({
   message,
   isLoading,
-  onInputChange,
+  setMessage,
   onSendMessage,
   onClearMessage,
 }: ChatInputProps) {
@@ -27,10 +27,6 @@ export default function ChatInput({
       e.preventDefault();
       onSendMessage();
     }
-  };
-
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onInputChange(e);
   };
 
   const handleAttachClick = () => {
@@ -45,9 +41,9 @@ export default function ChatInput({
             placeholder="Faça-me uma pergunta sobre seus dados que eu possa transformar em SQL"
             className="resize-none text-base"
             rows={3}
-            autoSize={{ minRows: 3, maxRows: 6 }}
+            autoSize={{ minRows: 3, maxRows: 4 }}
             value={message}
-            onChange={handleTextareaChange}
+            onChange={(e) => setMessage(e.target.value)}
             maxLength={3000}
             bordered={false}
             onKeyDown={handleKeyDown}
@@ -97,8 +93,8 @@ export default function ChatInput({
               type="text"
               size="small"
               className="!text-gray-500 hover:text-gray-700"
-              onClick={onSendMessage}
-              disabled={isLoading}
+              onClick={() => onSendMessage()}
+              disabled={isLoading || message.length === 0}
             >
               {isLoading ? (
                 <Loader2 className="animate-spin" size={14} />
@@ -106,7 +102,7 @@ export default function ChatInput({
                 <SendHorizontal
                   size={16}
                   className={`${
-                    message.length > 0 ? "text-purple-600" : "text-gray-500"
+                    message.length > 0 ? "text-violet-700" : "text-gray-500"
                   }`}
                 />
               )}

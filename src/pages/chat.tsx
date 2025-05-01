@@ -1,87 +1,77 @@
-import { startTransition, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { useNavigate, useParams } from "react-router-dom";
 import ChatView from "../components/Chat/ChatView";
 import HeaderChatView from "../components/Chat/HeaderChatView";
 import PromptSuggestions from "../components/Chat/PromptSuggestions";
 import ChatInput from "../components/ChatInput";
 import GradientText from "../components/GradientText";
+import { Message } from "../interface/IChat";
+import {
+  useAddMessageMutation,
+  useCreateChatMutation,
+  useGetChatByIdQuery,
+} from "../store/services/chatApi";
 
 export default function Chat() {
-  const [message, setMessage] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState<
-    Array<{
-      type: "user" | "assistant";
-      message: string;
-    }>
-  >([]);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [chatMessage, setChatMessage] = useState("");
+
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Adicionar respostas mocadas
-  const mockResponses: { [key: string]: string } = {
-    "Como otimizar uma consulta SQL que está muito lenta?":
-      "Para otimizar uma consulta SQL lenta, você pode: \n1. Adicionar índices apropriados\n2. Evitar SELECT *\n3. Usar EXPLAIN para analisar a execução\n4. Limitar resultados com WHERE adequado",
-    "Ajude-me a criar uma query com JOIN entre várias tabelas":
-      "Aqui está um exemplo de JOIN múltiplo:\n```sql\nSELECT a.nome, b.departamento, c.salario\nFROM funcionarios a\nINNER JOIN departamentos b ON a.dept_id = b.id\nINNER JOIN salarios c ON a.id = c.funcionario_id;\n```",
-    default: "Desculpe, não entendi sua pergunta. Pode reformular?",
-  };
+  const [createChat, { isLoading: isCreating }] = useCreateChatMutation();
+  const [addMessage, { isLoading: isAdding }] = useAddMessageMutation();
+  const { data: chatData } = useGetChatByIdQuery(String(id), {
+    skip: !id,
+  });
 
-  // Adicionar função para buscar histórico
-  const fetchQuestionHistory = async () => {
-    try {
-      const response = await fetch(
-        "https://protec.biofy.tech/api/v0/get_question_history"
-      );
-      if (!response.ok) {
-        throw new Error("Falha ao buscar histórico");
-      }
-      const data = await response.json();
-      // Assumindo que a API retorna um array de objetos com type e message
-      setChatHistory(data);
-    } catch (error) {
-      console.error("Erro ao buscar histórico:", error);
-    }
-  };
-
-  // Usar useEffect para carregar o histórico quando o componente montar
-  useEffect(() => {
-    fetchQuestionHistory();
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-  };
-
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      setIsLoading(true);
-
-      startTransition(() => {
-        setIsSubmitted(true);
-
-        // Adicionar mensagem do usuário
-        setChatHistory((prev) => [...prev, { type: "user", message: message }]);
-
-        // Simular delay de resposta
-        setTimeout(() => {
-          // Adicionar resposta do assistente
-          const response =
-            mockResponses[message.trim()] || mockResponses.default;
-          setChatHistory((prev) => [
-            ...prev,
-            { type: "assistant", message: response },
-          ]);
-          setIsLoading(false);
-        }, 1000);
-      });
-
-      setMessage("");
-    }
-  };
+  // const messageList = useMemo(() => {
+  //   if (chatData?.messages) {
+  //     return chatData.messages;
+  //   } else {
+  //     return chatHistory;
+  //   }
+  // }, [chatData, chatHistory]);
 
   const handleClearMessage = () => {
-    setMessage("");
+    setChatMessage("");
   };
+
+  const handleSendMessage = useCallback(() => {
+    try {
+      if (!id) {
+        // Criar novo chat
+        const response = createChat({ question: chatMessage });
+
+        response.then((res: any) => {
+          if (!res.data) {
+            toast.error("Erro ao criar chat");
+          }
+          navigate(`/chat/${res.data.id}`);
+        });
+      } else {
+        // Adicionar mensagem ao chat existente
+        const newMessage: Message = {
+          id: Math.random().toString(36).substring(2, 15),
+          type: "user",
+          message: chatMessage,
+          timestamp: new Date().toISOString(),
+        };
+
+        const response = addMessage({ id, message: newMessage });
+        response.then((res: any) => {
+          if (!res.data) {
+            toast.error("Erro ao enviar mensagem");
+          }
+        });
+      }
+
+      setChatMessage("");
+    } catch (error) {
+      toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
+    }
+  }, [id, createChat, chatMessage, navigate, addMessage]);
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -92,22 +82,18 @@ export default function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatHistory, isLoading]);
+  }, [chatData, isAdding, isCreating]);
 
   return (
     <div className="w-full h-full flex flex-col font-inter overflow-y-auto">
-      {isSubmitted && (
+      {id && (
         <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
-          <HeaderChatView
-            setChatHistory={setChatHistory}
-            setMessage={setMessage}
-            setIsSubmitted={setIsSubmitted}
-          />
+          <HeaderChatView setMessage={setChatMessage} />
         </div>
       )}
       <div
         className={`w-full ${
-          isSubmitted
+          id
             ? "h-[70%] min-[400px]:h-[75%] min-[400px]:min-h-[75%] md:h-[92%] md:min-[400px]:min-h-[92%]"
             : "h-full md:h-auto  md:my-auto"
         } mx-auto flex flex-col py-4 md:py-0 md:justify-center gap-2 md:gap-7 md:px-2`}
@@ -116,7 +102,7 @@ export default function Chat() {
         <div
           className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center  transition-all duration-500 overflow-hidden
             ${
-              isSubmitted
+              id
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"
                 : "max-h-[1000px] opacity-100 translate-y-0"
             }
@@ -143,29 +129,32 @@ export default function Chat() {
           </div>
 
           {/* Prompt Suggestions */}
-          <PromptSuggestions setMessage={setMessage} />
+          <PromptSuggestions setMessage={setChatMessage} />
         </div>
         {/* Chat Area */}
-        {isSubmitted && (
+        {id && (
           <div
             ref={chatContainerRef}
             className="w-full h-[72%] min-h-[72%] overflow-y-auto mx-auto px-2 md:px-0"
           >
-            <ChatView chatHistory={chatHistory} isLoading={isLoading} />
+            <ChatView
+              chatHistory={chatData?.messages || []}
+              isLoading={isAdding || isCreating}
+            />
           </div>
         )}
         {/* Input do chat */}
         <div
           className={`w-full md:h-[25%] max-w-3xl mx-auto ${
-            isSubmitted ? "mb-4" : "md:mb-4"
+            id ? "mb-4" : "md:mb-4"
           } px-2 mt-auto`}
         >
           <ChatInput
-            message={message}
-            onInputChange={handleInputChange}
+            message={chatMessage}
+            setMessage={setChatMessage}
             onSendMessage={handleSendMessage}
             onClearMessage={handleClearMessage}
-            isLoading={isLoading}
+            isLoading={isAdding || isCreating}
           />
         </div>
       </div>

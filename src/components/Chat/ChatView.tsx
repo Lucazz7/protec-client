@@ -1,14 +1,14 @@
-import { ChatHistory } from "../../interface/IChat";
+import { Message } from "../../interface/IChat";
 
 interface ChatViewProps {
-  chatHistory: ChatHistory[];
+  chatHistory: Message[];
   isLoading: boolean;
 }
 
 export default function ChatView({ chatHistory, isLoading }: ChatViewProps) {
   return (
     <div className="mx-auto w-full max-w-3xl mb-6 space-y-6 font-inter text-sm">
-      {chatHistory.map((chat, index) => (
+      {chatHistory?.map((chat, index) => (
         <div
           key={index}
           className={`flex ${
@@ -16,7 +16,7 @@ export default function ChatView({ chatHistory, isLoading }: ChatViewProps) {
           } animate-fade-in`}
         >
           <div
-            className={`max-w-[80%] p-2 px-4 rounded-full rounded-br-none ${
+            className={`max-w-[80%] p-2 px-4 rounded-2xl rounded-br-none ${
               chat.type === "user" ? "bg-white text-gray-600" : ""
             }`}
           >

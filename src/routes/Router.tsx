@@ -29,7 +29,13 @@ export function Router() {
 
   const publicRoutes = [{ path: "/login", element: <Login /> }];
 
-  const privateRoutes = [{ path: "/", element: <Chat /> }];
+  const privateRoutes = [
+    {
+      path: "/",
+      element: <Chat />,
+    },
+    { path: "/chat/:id", element: <Chat /> },
+  ];
 
   return (
     <BrowserRouter basename="/">

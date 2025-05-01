@@ -1,18 +1,13 @@
 import { Button } from "antd";
 import { Cpu, List, RefreshCcwDot, Settings } from "lucide-react";
-import { ChatHistory } from "../../interface/IChat";
-
-interface HeaderChatViewProps {
-  setChatHistory: (chatHistory: ChatHistory[]) => void;
-  setMessage: (message: string) => void;
-  setIsSubmitted: (isSubmitted: boolean) => void;
-}
+import { useNavigate } from "react-router-dom";
 
 export default function HeaderChatView({
-  setChatHistory,
   setMessage,
-  setIsSubmitted,
-}: HeaderChatViewProps) {
+}: {
+  setMessage: (message: string) => void;
+}) {
+  const navigate = useNavigate();
   return (
     <>
       <span className="text-base text-gray-500 flex items-center gap-2">
@@ -22,9 +17,8 @@ export default function HeaderChatView({
         <Button
           className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
           onClick={() => {
-            setChatHistory([]);
+            navigate("/");
             setMessage("");
-            setIsSubmitted(false);
           }}
         >
           <RefreshCcwDot size={16} />
