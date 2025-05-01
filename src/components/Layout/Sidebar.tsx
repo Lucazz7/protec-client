@@ -132,11 +132,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           isOpen ? "h-[10%]" : "h-full"
         } w-full lg:h-[10%] flex flex-row-reverse lg:flex-row gap-2 items-center relative py-2 px-3`}
       >
-        <img
-          src="/image/svg/fav-icon-biofy.svg"
-          alt="logo"
-          className="h-10 lg:h-14 invert cursor-pointer "
-        />
+        <Link to={`/chat`}>
+          <img
+            src="/image/svg/fav-icon-biofy.svg"
+            alt="logo"
+            className="h-10 lg:h-14 invert cursor-pointer "
+          />
+        </Link>
         <div className="hidden lg:flex w-full items-center">
           <span className="text-2xl font-semibold text-gray-700">Protec</span>
           <span className="text-sm text-gray-500 pt-11 -ms-4 -mt-2">
@@ -158,7 +160,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           isOpen ? "flex flex-col" : "hidden lg:flex lg:flex-col"
         }`}
       >
-        <div className="w-full md:h-[15%] flex flex-col py-2 ">
+        <div className="w-full md:h-[17%] flex flex-col py-2 ">
           <hr className="w-full border-gray-300 pb-2" />
           <div className="w-full h-full flex flex-col gap-6  text-gray-500 ">
             {listMenu.map((item, index) =>
@@ -185,9 +187,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>
         </div>
         <div className="w-full h-[70%] md:h-[80%] flex flex-col">
-          <hr className="w-full border-gray-300 " />
-          <div className="w-full h-full  overflow-y-auto flex flex-col gap-4 my-4 text-black ">
-            <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2">
+          <hr className="w-full border-gray-300" />
+          <div className="w-full h-full  overflow-y-auto flex flex-col py-4 text-black ">
+            <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2 pb-2">
               <History size={20} />
               Conversas Recentes
             </span>
