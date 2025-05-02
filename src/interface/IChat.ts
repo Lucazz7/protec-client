@@ -1,8 +1,3 @@
-export interface ChatRequests {
-  id: string;
-  messages: Message[];
-}
-
 export interface Message {
   id: string;
   type: string;
@@ -10,7 +5,7 @@ export interface Message {
   timestamp: string;
 }
 
-export interface Question {
+export interface IQuestion {
   id: string;
   question: string;
 }
@@ -25,4 +20,14 @@ export interface Prompt {
   title: string;
   description: string;
   category: string;
+}
+
+export interface IHistoryQuestion {
+  questions: IQuestion[];
+  type: string;
+}
+
+export interface IQuestion {
+  id: string;
+  question: string;
 }

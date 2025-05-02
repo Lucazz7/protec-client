@@ -7,7 +7,24 @@ const chats: Chat[] = [];
 export class ChatController {
   getAllChats = async (req: Request, res: Response) => {
     try {
-      res.json(chats);
+      // Pega apenas a primeira mensagem do usuário de cada chat
+      const questions = chats
+        .map((chat) => {
+          const firstUserMsg = chat.messages.find((msg) => msg.type === "user");
+          if (!firstUserMsg) return null;
+          return {
+            id: chat.id,
+            question: firstUserMsg.message,
+          };
+        })
+        .filter((msg) => !!msg); // Remove undefined, caso algum chat não tenha mensagem do usuário
+
+      const history = {
+        questions,
+        type: "question_history",
+      };
+
+      res.json(history);
     } catch (error) {
       res.status(500).json({ error: "Erro ao buscar chats" });
     }

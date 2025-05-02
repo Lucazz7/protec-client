@@ -1,5 +1,6 @@
 const API_URL = "http://localhost:3001/api/chats";
-import { ChatRequests, Message, Question } from "../../interface/IChat";
+// const API_URL = "https://protec.biofy.tech/api/v0/";
+import { IHistoryQuestion, Message } from "../../interface/IChat";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Chat } from "../../interface/IChat";
@@ -13,12 +14,8 @@ export const chatApi = createApi({
       query: () => "/",
       providesTags: ["Chat"],
     }),
-    getHistory: builder.query<ChatRequests[], void>({
+    getHistory: builder.query<IHistoryQuestion, void>({
       query: () => "/",
-      providesTags: ["Chat"],
-    }),
-    getQuestionById: builder.query<Question, string>({
-      query: (id) => `/history/${id}`,
       providesTags: ["Chat"],
     }),
     getChatById: builder.query<Chat, string>({
@@ -51,7 +48,6 @@ export const {
   useGetChatsQuery,
   useGetChatByIdQuery,
   useGetHistoryQuery,
-  useGetQuestionByIdQuery,
   //   createChat
   useCreateChatMutation,
   //   addMessage

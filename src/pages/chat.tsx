@@ -1,3 +1,4 @@
+import { RefreshCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,17 +23,15 @@ export default function Chat() {
 
   const [createChat, { isLoading: isCreating }] = useCreateChatMutation();
   const [addMessage, { isLoading: isAdding }] = useAddMessageMutation();
-  const { data: chatData } = useGetChatByIdQuery(String(id), {
+  const {
+    data: chatData,
+    isLoading: isLoadingChat,
+    isFetching,
+    error,
+    refetch,
+  } = useGetChatByIdQuery(String(id), {
     skip: !id,
   });
-
-  // const messageList = useMemo(() => {
-  //   if (chatData?.messages) {
-  //     return chatData.messages;
-  //   } else {
-  //     return chatHistory;
-  //   }
-  // }, [chatData, chatHistory]);
 
   const handleClearMessage = () => {
     setChatMessage("");
@@ -137,26 +136,60 @@ export default function Chat() {
             ref={chatContainerRef}
             className="w-full h-[72%] min-h-[72%] overflow-y-auto mx-auto px-2 md:px-0"
           >
-            <ChatView
-              chatHistory={chatData?.messages || []}
+            {isLoadingChat || isFetching ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                {/* Spinner simples, pode trocar por um componente de loading */}
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+                <span className="text-gray-500">Carregando histórico...</span>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4">
+                <span className="text-red-500 font-semibold">
+                  Erro ao carregar histórico. Tentar novamente.
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      console.log("Refetch clicado", id);
+                      refetch();
+                    }}
+                    className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  >
+                    <RefreshCcw />
+                    Tentar novamente
+                  </button>
+                  <button
+                    onClick={() => navigate("/")}
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
+                  >
+                    Limpar conversa
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <ChatView
+                chatHistory={chatData?.messages || []}
+                isLoading={isAdding || isCreating}
+              />
+            )}
+          </div>
+        )}
+        {/* Input do chat */}
+        {!isLoadingChat && !isFetching && (
+          <div
+            className={`w-full md:h-[25%] max-w-3xl mx-auto ${
+              id ? "mb-4" : "md:mb-4"
+            } px-2 mt-auto`}
+          >
+            <ChatInput
+              message={chatMessage}
+              setMessage={setChatMessage}
+              onSendMessage={handleSendMessage}
+              onClearMessage={handleClearMessage}
               isLoading={isAdding || isCreating}
             />
           </div>
         )}
-        {/* Input do chat */}
-        <div
-          className={`w-full md:h-[25%] max-w-3xl mx-auto ${
-            id ? "mb-4" : "md:mb-4"
-          } px-2 mt-auto`}
-        >
-          <ChatInput
-            message={chatMessage}
-            setMessage={setChatMessage}
-            onSendMessage={handleSendMessage}
-            onClearMessage={handleClearMessage}
-            isLoading={isAdding || isCreating}
-          />
-        </div>
       </div>
     </div>
   );

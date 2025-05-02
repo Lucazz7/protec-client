@@ -31,7 +31,11 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const navigate = useNavigate();
 
-  const { data: questions } = useGetHistoryQuery();
+  const {
+    data: historyQuestion,
+    isLoading: isLoadingHistory,
+    isFetching: isFetchingHistory,
+  } = useGetHistoryQuery();
 
   return (
     <div
@@ -116,24 +120,30 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               Conversas Recentes
             </span>
             <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2">
-              {questions?.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    navigate(`/chat/${item.id}`);
-                  }}
-                  className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
-                >
-                  <span className="text-sm line-clamp-1 text">
-                    {item?.messages[0]?.message?.charAt(0).toUpperCase() +
-                      item?.messages[0]?.message?.slice(1)}
-                  </span>
+              {isLoadingHistory || isFetchingHistory ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
                 </div>
-              ))}
+              ) : (
+                historyQuestion?.questions?.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      navigate(`/chat/${item.id}`);
+                    }}
+                    className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
+                  >
+                    <span className="text-sm line-clamp-1 text">
+                      {item?.question?.charAt(0).toUpperCase() +
+                        item?.question?.slice(1)}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>{" "}
         </div>
-        <div className="w-full  flex md:hidden flex-col mt-auto ">
+        <div className="w-full  flex lg:hidden flex-col mt-auto ">
           <hr className="w-full border-gray-300" />
           <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
             <div className="w-auto p-2 bg-gray-300 rounded-full">
@@ -146,7 +156,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>
         </div>
       </div>
-      <div className="w-full hidden md:flex flex-col mt-auto ">
+      <div className="w-full hidden lg:flex flex-col mt-auto ">
         <hr className="w-full border-gray-300" />
         <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
           <div className="w-auto p-2 bg-gray-300 rounded-full">
