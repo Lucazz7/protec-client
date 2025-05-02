@@ -46,8 +46,9 @@ export default function Chat() {
 
         response.then((res: any) => {
           if (!res.data) {
-            toast.error("Erro ao criar chat");
+            return toast.error("Erro ao enviar mensagem");
           }
+          setChatMessage("");
           navigate(`/chat/${res.data.id}`);
         });
       } else {
@@ -62,12 +63,11 @@ export default function Chat() {
         const response = addMessage({ id, message: newMessage });
         response.then((res: any) => {
           if (!res.data) {
-            toast.error("Erro ao enviar mensagem");
+            return toast.error("Erro ao enviar mensagem");
           }
+          setChatMessage("");
         });
       }
-
-      setChatMessage("");
     } catch (error) {
       toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
     }
