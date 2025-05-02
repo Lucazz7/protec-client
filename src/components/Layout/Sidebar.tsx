@@ -7,7 +7,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetHistoryQuery } from "../../store/services/chatApi";
 
 const listMenu = [
@@ -29,6 +29,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+  const { id } = useParams<{ id: string }>();
+
   const navigate = useNavigate();
 
   const {
@@ -119,7 +121,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               <History size={20} />
               Conversas Recentes
             </span>
-            <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2">
+            <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2 gap-1">
               {isLoadingHistory || isFetchingHistory ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
@@ -131,7 +133,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     onClick={() => {
                       navigate(`/chat/${item.id}`);
                     }}
-                    className="w-full flex items-center gap-3 font-light hover:text-white hover:bg-gray-600 p-2 rounded-md transition-all duration-300 text-gray-600"
+                    className={`w-full flex items-center gap-3 font-light  p-2 rounded-md transition-all duration-300 text-gray-600 cursor-pointer ${
+                      id == item.id
+                        ? "bg-gradient-to-l from-gray-400 to-gray-500 to-40% text-white hover:bg-opacity-80"
+                        : "hover:text-white hover:bg-gray-600"
+                    }`}
                   >
                     <span className="text-sm line-clamp-1 text">
                       {item?.question?.charAt(0).toUpperCase() +
