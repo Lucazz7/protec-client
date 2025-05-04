@@ -1,8 +1,11 @@
 export interface Message {
   id: string;
-  type: string;
-  message: string;
-  timestamp: string;
+  type: "user" | "text" | "question_cache";
+  question?: string;
+  text?: string;
+  sql?: string;
+  df?: string;
+  fig?: string;
 }
 
 export interface IQuestion {

@@ -1,4 +1,3 @@
-import { RefreshCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,10 +13,22 @@ import {
   useGetChatByIdQuery,
 } from "../store/services/chatApi";
 
+const MOCK_RESPONSE = {
+  df: '[{"count":7373}]',
+  fig: '{"data":[{"hovertemplate":"variable=count<br>index=%{x}<br>value=%{y}<extra></extra>","legendgroup":"count","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"count","orientation":"v","showlegend":true,"x":{"dtype":"i1","bdata":"AA=="},"xaxis":"x","y":{"dtype":"i2","bdata":"zRw="},"yaxis":"y","type":"scatter"}],"layout":{"template":{"data":{}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"index"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"value"}},"legend":{"title":{"text":"variable"},"tracegroupgap":0},"margin":{"t":60}}}',
+  id: "e9d3f6d7-823d-4dbe-9136-9163b034cabf",
+  question:
+    "Quais são os pedidos que foram cancelados e quantos produtos estão ativos no sistema hoje?",
+  sql: "SELECT \n    COUNT(*) \nFROM \n    PRODUTO \nWHERE \n    PRODUTO.ativo = 1;",
+  summary: null,
+  type: "question_cache",
+};
+
 export default function Chat() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [chatMessage, setChatMessage] = useState("");
+  const [mockHistory, setMockHistory] = useState<Message[]>([]);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -39,38 +50,32 @@ export default function Chat() {
 
   const handleSendMessage = useCallback(() => {
     try {
-      if (!id) {
-        // Criar novo chat
-        const response = createChat({ question: chatMessage });
+      if (!chatMessage.trim()) return;
 
-        response.then((res: any) => {
-          if (!res.data) {
-            return toast.error("Erro ao enviar mensagem");
-          }
-          setChatMessage("");
-          navigate(`/chat/${res.data.id}`);
-        });
-      } else {
-        // Adicionar mensagem ao chat existente
-        const newMessage: Message = {
-          id: Math.random().toString(36).substring(2, 15),
-          type: "user",
-          message: chatMessage,
-          timestamp: new Date().toISOString(),
+      // Adiciona a mensagem do usuário
+      const userMessage: Message = {
+        id: Math.random().toString(36).substring(2, 15),
+        type: "user",
+        question: chatMessage,
+      };
+
+      setMockHistory((prev) => [...prev, userMessage]);
+
+      // Adiciona a resposta mockada
+      setTimeout(() => {
+        const mockMsg: Message = {
+          id: MOCK_RESPONSE.id,
+          type: "question_cache",
+          question: JSON.stringify(MOCK_RESPONSE),
         };
+        setMockHistory((prev) => [...prev, mockMsg]);
+      }, 500);
 
-        const response = addMessage({ id, message: newMessage });
-        response.then((res: any) => {
-          if (!res.data) {
-            return toast.error("Erro ao enviar mensagem");
-          }
-          setChatMessage("");
-        });
-      }
+      setChatMessage("");
     } catch (error) {
       toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
     }
-  }, [id, createChat, chatMessage, navigate, addMessage]);
+  }, [chatMessage]);
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -81,18 +86,18 @@ export default function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatData, isAdding, isCreating]);
+  }, [chatData, isAdding, isCreating, mockHistory]);
 
   return (
     <div className="w-full h-full flex flex-col font-inter overflow-y-auto">
-      {id && (
+      {mockHistory.length > 0 && (
         <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
           <HeaderChatView setMessage={setChatMessage} />
         </div>
       )}
       <div
         className={`w-full ${
-          id
+          mockHistory.length > 0
             ? "h-[70%] min-[400px]:h-[75%] min-[400px]:min-h-[75%] md:h-[92%] md:min-[400px]:min-h-[92%]"
             : "h-full md:h-auto  md:my-auto"
         } mx-auto flex flex-col py-4 md:py-0 md:justify-center gap-2 md:gap-7 md:px-2`}
@@ -101,7 +106,7 @@ export default function Chat() {
         <div
           className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center  transition-all duration-500 overflow-hidden
             ${
-              id
+              mockHistory.length > 0
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"
                 : "max-h-[1000px] opacity-100 translate-y-0"
             }
@@ -131,54 +136,19 @@ export default function Chat() {
           <PromptSuggestions setMessage={setChatMessage} />
         </div>
         {/* Chat Area */}
-        {id && (
+        {mockHistory.length > 0 && (
           <div
             ref={chatContainerRef}
             className="w-full h-[72%] min-h-[72%] overflow-y-auto mx-auto px-2 md:px-0"
           >
-            {isLoadingChat || isFetching ? (
-              <div className="flex flex-col items-center justify-center h-full">
-                {/* Spinner simples, pode trocar por um componente de loading */}
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
-                <span className="text-gray-500">Carregando histórico...</span>
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center h-full gap-4">
-                <span className="text-red-500 font-semibold">
-                  Erro ao carregar histórico. Tentar novamente.
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      console.log("Refetch clicado", id);
-                      refetch();
-                    }}
-                    className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                  >
-                    <RefreshCcw />
-                    Tentar novamente
-                  </button>
-                  <button
-                    onClick={() => navigate("/")}
-                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
-                  >
-                    Limpar conversa
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <ChatView
-                chatHistory={chatData?.messages || []}
-                isLoading={isAdding || isCreating}
-              />
-            )}
+            <ChatView chatHistory={mockHistory} isLoading={false} />
           </div>
         )}
         {/* Input do chat */}
         {!isLoadingChat && !isFetching && (
           <div
             className={`w-full md:h-[25%] max-w-3xl mx-auto ${
-              id ? "mb-4" : "md:mb-4"
+              mockHistory.length > 0 ? "mb-4" : "md:mb-4"
             } px-2 mt-auto`}
           >
             <ChatInput
