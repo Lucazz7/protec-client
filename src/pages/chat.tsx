@@ -13,7 +13,7 @@ import {
   useGetChatByIdQuery,
 } from "../store/services/chatApi";
 
-const MOCK_RESPONSE = {
+const MOCK_RESPONSE_SQL = {
   df: '[{"count":7373}]',
   fig: '{"data":[{"hovertemplate":"variable=count<br>index=%{x}<br>value=%{y}<extra></extra>","legendgroup":"count","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"count","orientation":"v","showlegend":true,"x":{"dtype":"i1","bdata":"AA=="},"xaxis":"x","y":{"dtype":"i2","bdata":"zRw="},"yaxis":"y","type":"scatter"}],"layout":{"template":{"data":{}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"index"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"value"}},"legend":{"title":{"text":"variable"},"tracegroupgap":0},"margin":{"t":60}}}',
   id: "e9d3f6d7-823d-4dbe-9136-9163b034cabf",
@@ -22,6 +22,12 @@ const MOCK_RESPONSE = {
   sql: "SELECT \n    COUNT(*) \nFROM \n    PRODUTO \nWHERE \n    PRODUTO.ativo = 1;",
   summary: null,
   type: "question_cache",
+};
+
+const MOCK_RESPONSE_TEXT = {
+  id: "00f80a94-ecd3-42ac-97e0-48a2653a22af",
+  text: "Olá! Como posso ajudar você hoje? Você tem alguma pergunta ou precisa de ajuda com uma consulta SQL?",
+  type: "text",
 };
 
 export default function Chat() {
@@ -61,14 +67,25 @@ export default function Chat() {
 
       setMockHistory((prev) => [...prev, userMessage]);
 
-      // Adiciona a resposta mockada
+      // Verifica se a mensagem contém SQL
+      const contemSQL = chatMessage.toLowerCase().includes("sql");
+
       setTimeout(() => {
-        const mockMsg: Message = {
-          id: MOCK_RESPONSE.id,
-          type: "question_cache",
-          question: JSON.stringify(MOCK_RESPONSE),
-        };
-        setMockHistory((prev) => [...prev, mockMsg]);
+        if (contemSQL) {
+          const mockMsg: Message = {
+            id: MOCK_RESPONSE_SQL.id,
+            type: "question_cache",
+            question: JSON.stringify(MOCK_RESPONSE_SQL),
+          };
+          setMockHistory((prev) => [...prev, mockMsg]);
+        } else {
+          const mockMsg: Message = {
+            id: MOCK_RESPONSE_TEXT.id,
+            type: "text",
+            question: MOCK_RESPONSE_TEXT.text,
+          };
+          setMockHistory((prev) => [...prev, mockMsg]);
+        }
       }, 500);
 
       setChatMessage("");

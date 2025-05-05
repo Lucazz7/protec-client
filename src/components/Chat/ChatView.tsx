@@ -8,7 +8,7 @@ interface ChatViewProps {
 
 export default function ChatView({ chatHistory, isLoading }: ChatViewProps) {
   return (
-    <div className="mx-auto w-full max-w-3xl mb-6 space-y-6 font-inter text-sm">
+    <div className="mx-auto w-full max-w-3xl  mb-6 space-y-6 font-inter text-sm">
       {chatHistory?.map((chat, index) => {
         if (chat.question?.includes("sql")) {
           let mock;
@@ -24,7 +24,7 @@ export default function ChatView({ chatHistory, isLoading }: ChatViewProps) {
                 key={index}
                 className="w-full flex justify-start animate-fade-in flex-col gap-2"
               >
-                <div className="bg-gray-100 p-2 rounded">
+                <div className=" p-2 rounded">
                   <div className="font-mono text-xs text-gray-700 mb-1">
                     Resultado SQL:
                   </div>
@@ -38,7 +38,7 @@ export default function ChatView({ chatHistory, isLoading }: ChatViewProps) {
                       .join("\n")}
                   </pre>
                 </div>
-                <div className="w-full h-96">
+                <div className="w-full flex justify-center h-96">
                   {mock.fig && (
                     <div className="w-full relative  bg-white h-full p-2 rounded shadow">
                       <Plot
@@ -46,7 +46,9 @@ export default function ChatView({ chatHistory, isLoading }: ChatViewProps) {
                         layout={JSON.parse(mock.fig).layout}
                         className="w-full h-full"
                         style={{ width: "100%", height: "100%" }}
-                        config={{ displayModeBar: true }}
+                        config={{
+                          displayModeBar: true,
+                        }}
                       />
                     </div>
                   )}
