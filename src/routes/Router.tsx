@@ -5,6 +5,7 @@ import Layout from "../components/Layout/Layout";
 import Chat from "../pages/chat";
 import Login from "../pages/login";
 import NotFound from "../pages/notfound";
+import TrainingFiles from "../pages/trainingFiles";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   // const { useAuth } = useAppSelector(userAuth);
@@ -35,6 +36,7 @@ export function Router() {
       element: <Chat />,
     },
     { path: "/chat/:id", element: <Chat /> },
+    { path: "/training-files", element: <TrainingFiles /> },
   ];
 
   return (

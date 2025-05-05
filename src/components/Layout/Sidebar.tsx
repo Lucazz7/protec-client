@@ -19,7 +19,7 @@ const listMenu = [
   {
     name: "Dados de treinamento",
     icon: <Database size={20} />,
-    path: "/chat",
+    path: "/training-files",
   },
 ];
 
