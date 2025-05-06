@@ -1,98 +1,213 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import ChatView from "../components/Chat/ChatView";
 import HeaderChatView from "../components/Chat/HeaderChatView";
 import PromptSuggestions from "../components/Chat/PromptSuggestions";
 import ChatInput from "../components/ChatInput";
 import GradientText from "../components/GradientText";
-import { Message } from "../interface/IChat";
+import { useAppSelect } from "../store";
+import { setChatHistory } from "../store/redux/chatSlice";
 import {
   useAddMessageMutation,
+  useChatGenerateSqlMutation,
   useCreateChatMutation,
   useGetChatByIdQuery,
 } from "../store/services/chatApi";
 
-const MOCK_RESPONSE_SQL = {
-  df: '[{"count":7373}]',
-  fig: '{"data":[{"hovertemplate":"variable=count<br>index=%{x}<br>value=%{y}<extra></extra>","legendgroup":"count","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"count","orientation":"v","showlegend":true,"x":{"dtype":"i1","bdata":"AA=="},"xaxis":"x","y":{"dtype":"i2","bdata":"zRw="},"yaxis":"y","type":"scatter"}],"layout":{"template":{"data":{}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"index"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"value"}},"legend":{"title":{"text":"variable"},"tracegroupgap":0},"margin":{"t":60}}}',
-  id: "e9d3f6d7-823d-4dbe-9136-9163b034cabf",
-  question:
-    "Quais são os pedidos que foram cancelados e quantos produtos estão ativos no sistema hoje?",
-  sql: "SELECT \n    COUNT(*) \nFROM \n    PRODUTO \nWHERE \n    PRODUTO.ativo = 1;",
-  summary: null,
-  type: "question_cache",
-};
-
-const MOCK_RESPONSE_TEXT = {
-  id: "00f80a94-ecd3-42ac-97e0-48a2653a22af",
-  text: "Olá! Como posso ajudar você hoje? Você tem alguma pergunta ou precisa de ajuda com uma consulta SQL?",
-  type: "text",
-};
-
 export default function Chat() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
-  const [chatMessage, setChatMessage] = useState("");
-  const [mockHistory, setMockHistory] = useState<Message[]>([]);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const [createChat, { isLoading: isCreating }] = useCreateChatMutation();
+  const [chatGenerateSql, { isLoading: isGeneratingSql }] =
+    useChatGenerateSqlMutation();
   const [addMessage, { isLoading: isAdding }] = useAddMessageMutation();
-  const {
-    data: chatData,
-    isLoading: isLoadingChat,
-    isFetching,
-    error,
-    refetch,
-  } = useGetChatByIdQuery(String(id), {
-    skip: !id,
+  const { isLoading: isLoadingChat, isFetching } = useGetChatByIdQuery(
+    String(id),
+    {
+      skip: !id,
+      refetchOnMountOrArgChange: true,
+    }
+  );
+
+  const [chatMessage, setChatMessage] = useState("");
+  const { chatHistory, error } = useAppSelect((state) => {
+    return {
+      chatHistory: state.chatSlice.chatHistory,
+      error: state.chatSlice.error,
+    };
   });
 
   const handleClearMessage = () => {
     setChatMessage("");
   };
 
-  const handleSendMessage = useCallback(() => {
-    try {
-      if (!chatMessage.trim()) return;
+  const handleAddMessage = useCallback(() => {
+    if (!id) return;
+    const currentMessage = chatMessage;
+    setChatMessage("");
 
-      // Adiciona a mensagem do usuário
-      const userMessage: Message = {
-        id: Math.random().toString(36).substring(2, 15),
-        type: "user",
-        question: chatMessage,
-      };
+    // Adiciona a mensagem do usuário imediatamente ao histórico
+    dispatch(
+      setChatHistory([
+        ...chatHistory,
+        {
+          id: "",
+          type: "user",
+          question: currentMessage,
+        },
+      ])
+    );
 
-      setMockHistory((prev) => [...prev, userMessage]);
+    // Pega a última pergunta do usuário
+    const lastUserMessage = [...chatHistory]
+      .reverse()
+      .find((msg) => msg.type === "user" && msg.question);
 
-      // Verifica se a mensagem contém SQL
-      const contemSQL = chatMessage.toLowerCase().includes("sql");
+    const last_question = lastUserMessage?.question
+      ? lastUserMessage?.question
+      : "";
+    const new_question = currentMessage;
 
-      setTimeout(() => {
-        if (contemSQL) {
-          const mockMsg: Message = {
-            id: MOCK_RESPONSE_SQL.id,
-            type: "question_cache",
-            question: JSON.stringify(MOCK_RESPONSE_SQL),
-          };
-          setMockHistory((prev) => [...prev, mockMsg]);
-        } else {
-          const mockMsg: Message = {
-            id: MOCK_RESPONSE_TEXT.id,
-            type: "text",
-            question: MOCK_RESPONSE_TEXT.text,
-          };
-          setMockHistory((prev) => [...prev, mockMsg]);
+    const response = addMessage({
+      last_question,
+      new_question,
+    });
+
+    response.then((res) => {
+      if (res.error) {
+        toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
+        setChatMessage(currentMessage);
+        // Remove a mensagem do usuário adicionada caso dê erro
+        dispatch(setChatHistory(chatHistory.slice(0, -1)));
+      } else {
+        const response = createChat({ question: currentMessage });
+
+        response.then((res) => {
+          if (res.error) {
+            toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
+            setChatMessage(currentMessage);
+            // Remove a mensagem do usuário adicionada caso dê erro
+            dispatch(setChatHistory(chatHistory.slice(0, -1)));
+          } else {
+            dispatch(
+              setChatHistory([
+                ...chatHistory,
+                {
+                  ...res?.data,
+                  question: res.data.text,
+                },
+              ])
+            );
+            if (res.data.type === "sql") {
+              const response = chatGenerateSql(res.data.id);
+
+              response.then((res) => {
+                if (res.error) {
+                  toast.error("Erro ao gerar SQL. Por favor, tente novamente.");
+                } else {
+                  dispatch(
+                    setChatHistory([
+                      ...chatHistory,
+                      {
+                        ...res?.data,
+                        question: res?.data.text,
+                      },
+                    ])
+                  );
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  }, [
+    id,
+    chatMessage,
+    dispatch,
+    chatHistory,
+    addMessage,
+    createChat,
+    chatGenerateSql,
+  ]);
+
+  const handleCreateChat = useCallback(() => {
+    // Adiciona a mensagem do usuário imediatamente ao histórico
+    dispatch(
+      setChatHistory([
+        ...chatHistory,
+        {
+          id: "",
+          type: "user",
+          question: chatMessage,
+        },
+      ])
+    );
+
+    const response = createChat({ question: chatMessage });
+
+    response.then((res) => {
+      if (res.error) {
+        toast.error("Erro ao enviar mensagem!");
+        // Remove a mensagem do usuário adicionada caso dê erro
+        dispatch(setChatHistory(chatHistory.slice(0, -1)));
+      } else {
+        navigate(`/chat/${res.data.id}`);
+        dispatch(
+          setChatHistory([
+            ...chatHistory,
+            {
+              ...res?.data,
+              question: res.data.text,
+            },
+          ])
+        );
+        if (res.data.type === "sql") {
+          const response = chatGenerateSql(res.data.id);
+
+          response.then((res) => {
+            if (res.error) {
+              toast.error("Erro ao gerar SQL!");
+            } else {
+              dispatch(
+                setChatHistory([
+                  ...chatHistory,
+                  {
+                    ...res?.data,
+                    question: res?.data.text,
+                  },
+                ])
+              );
+            }
+          });
         }
-      }, 500);
+        setChatMessage("");
+      }
+    });
+  }, [
+    chatGenerateSql,
+    chatHistory,
+    chatMessage,
+    createChat,
+    dispatch,
+    navigate,
+  ]);
 
-      setChatMessage("");
-    } catch (error) {
-      toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
+  const handleSendMessage = useCallback(() => {
+    if (!id) {
+      return handleCreateChat();
     }
-  }, [chatMessage]);
+    return handleAddMessage();
+  }, [handleAddMessage, handleCreateChat, id]);
+
+  const loading =
+    isAdding || isCreating || isGeneratingSql || isFetching || isLoadingChat;
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -103,18 +218,18 @@ export default function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatData, isAdding, isCreating, mockHistory]);
+  }, [isAdding, isCreating, chatHistory]);
 
   return (
     <div className="w-full h-full flex flex-col font-inter overflow-y-auto">
-      {mockHistory.length > 0 && (
+      {id && (
         <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
           <HeaderChatView setMessage={setChatMessage} />
         </div>
       )}
       <div
         className={`w-full ${
-          mockHistory.length > 0
+          id
             ? "h-[70%] min-[400px]:h-[75%] min-[400px]:min-h-[75%] md:h-[92%] md:min-[400px]:min-h-[92%]"
             : "h-full md:h-auto  md:my-auto"
         } mx-auto flex flex-col py-4 md:py-0 md:justify-center gap-2 md:gap-7 md:px-2`}
@@ -123,21 +238,21 @@ export default function Chat() {
         <div
           className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center  transition-all duration-500 overflow-hidden
             ${
-              mockHistory.length > 0
+              id
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"
                 : "max-h-[1000px] opacity-100 translate-y-0"
             }
           `}
         >
           <div className="text-center mb-2 md:mb-8 p-2">
-            <h1 className="text-base min-[400px]:text-xl lg:text-2xl md:text-4xl font-semibold mb-1">
+            <h1 className="text-base min-[400px]:text-xl md:text-2xl lg:text-4xl font-semibold mb-1">
               <GradientText
                 text="Explore o poder da"
                 gradientText="Inteligência Artificial"
                 gradientColors="from-pink-600 to-blue-800"
               />
             </h1>
-            <h2 className="text-base min-[400px]:text-xl lg:text-2xl md:text-3xl font-semibold mb-2 md:mb-4">
+            <h2 className="text-base min-[400px]:text-xl md:text-2xl lg:text-3xl font-semibold mb-2 md:mb-4">
               <GradientText
                 text="Otimize suas"
                 gradientText=" consultas"
@@ -153,20 +268,26 @@ export default function Chat() {
           <PromptSuggestions setMessage={setChatMessage} />
         </div>
         {/* Chat Area */}
-        {mockHistory.length > 0 && (
+        {id && (
           <div
             ref={chatContainerRef}
-            className="w-full h-[72%] min-h-[72%] overflow-y-auto mx-auto px-2 md:px-0"
+            className={`w-full  overflow-y-auto mx-auto px-2 md:px-0 ${
+              !id || (id && chatHistory.length > 0)
+                ? "h-[72%] min-h-[72%]"
+                : "h-full"
+            }`}
           >
-            <ChatView chatHistory={mockHistory} isLoading={false} />
+            <ChatView
+              chatHistory={chatHistory}
+              isLoading={loading}
+              error={error}
+            />
           </div>
         )}
         {/* Input do chat */}
-        {!isLoadingChat && !isFetching && (
+        {(!isLoadingChat && !isFetching && !error) || !id ? (
           <div
-            className={`w-full md:h-[25%] max-w-3xl mx-auto ${
-              mockHistory.length > 0 ? "mb-4" : "md:mb-4"
-            } px-2 mt-auto`}
+            className={`w-full md:h-[25%] max-w-3xl mx-auto mb-4 px-2 mt-auto`}
           >
             <ChatInput
               message={chatMessage}
@@ -176,7 +297,7 @@ export default function Chat() {
               isLoading={isAdding || isCreating}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

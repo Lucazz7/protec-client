@@ -9,6 +9,7 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
+import chatSlice from "./redux/chatSlice";
 import { chatApi } from "./services/chatApi";
 // import { persistReducer, persistStore } from "redux-persist";
 // import storage from "redux-persist/lib/storage";
@@ -23,6 +24,7 @@ import { chatApi } from "./services/chatApi";
 
 export const store = configureStore({
   reducer: {
+    chatSlice: chatSlice,
     [chatApi.reducerPath]: chatApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,5 +1,5 @@
-const API_URL = "http://localhost:3001/api/chats";
-// const API_URL = "https://protec.biofy.tech/api/v0/";
+// const API_URL = "http://localhost:3001/api/chats";
+const API_URL = "https://protec.biofy.tech/api/v0/";
 import { IHistoryQuestion, Message } from "../../interface/IChat";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -15,28 +15,34 @@ export const chatApi = createApi({
       providesTags: ["Chat"],
     }),
     getHistory: builder.query<IHistoryQuestion, void>({
-      query: () => "/",
+      query: () => "/get_question_history?",
       providesTags: ["Chat"],
     }),
-    getChatById: builder.query<Chat, string>({
-      query: (id) => `/${id}`,
+    getChatById: builder.query<Message, string>({
+      query: (id) => `load_question?id=${id}`,
       providesTags: ["Chat"],
     }),
-    createChat: builder.mutation<Chat, { question: string }>({
+    createChat: builder.mutation<Message, { question: string }>({
       query: (data) => ({
-        url: "/",
-        method: "POST",
-        body: {
-          question: data.question,
-        },
+        url: `/generate_sql?question=${data.question}`,
+        method: "GET",
       }),
       invalidatesTags: ["Chat"],
     }),
-    addMessage: builder.mutation<Chat, { id: string; message: Message }>({
-      query: ({ id, message }) => ({
-        url: `/${id}/messages`,
-        method: "POST",
-        body: message,
+    chatGenerateSql: builder.mutation<Message, string>({
+      query: (id) => ({
+        url: `/run_sql?id=${id}`,
+        method: "GET",
+      }),
+      invalidatesTags: ["Chat"],
+    }),
+    addMessage: builder.mutation<
+      Message,
+      { last_question: string; new_question: string }
+    >({
+      query: (message) => ({
+        url: `/generate_rewritten_question?last_question=${message.last_question}&new_question=${message.new_question}`,
+        method: "GET",
       }),
       invalidatesTags: ["Chat"],
     }),
@@ -50,6 +56,7 @@ export const {
   useGetHistoryQuery,
   //   createChat
   useCreateChatMutation,
+  useChatGenerateSqlMutation,
   //   addMessage
   useAddMessageMutation,
 } = chatApi;

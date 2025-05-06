@@ -37,22 +37,37 @@ export default function TrainingFiles() {
   };
 
   // Troque o dataSource para um estado
-  const [dataSource, setDataSource] = useState([
+  const [dataSource, setDataSource] = useState<
+    {
+      key: number;
+      acao: React.ReactNode;
+      questao: React.ReactNode;
+      conteudo: React.ReactNode;
+      tipo: React.ReactNode;
+    }[]
+  >([
     {
       key: 1,
       acao: null, // Será preenchido depois
-      questao:
-        "Quais são os pedidos que foram cancelados e quantos produtos estão ativos no sistema hoje?",
+      questao: (
+        <div className="flex flex-col gap-2 min-w-[200px]">
+          Quais são os pedidos que foram cancelados e quantos produtos estão
+          ativos no sistema hoje?
+        </div>
+      ),
       conteudo: (
-        <div className="flex flex-col gap-2">
+        <div className="w-fit flex flex-col gap-2 min-w-[250px]">
           <p className="py-1 px-2 bg-gray-100 rounded-lg">
             SELECT COUNT(*) FROM PRODUTO WHERE PRODUTO.ativo = 1;
           </p>
         </div>
       ),
-      tipo: "SQL",
+      tipo: (
+        <div className="flex items-center gap-2 max-w-[100px] justify-center">
+          SQL
+        </div>
+      ),
     },
-    // ... outros dados mockados se quiser ...
   ]);
 
   // Função para remover item
@@ -83,22 +98,34 @@ export default function TrainingFiles() {
   // Atualize as colunas para usar a função de remover
   const columns = [
     {
-      title: "Tipo de Dado de Treinamento",
+      title: (
+        <div className="min-w-[100px] flex items-center gap-2 justify-center">
+          Tipo de Dado
+        </div>
+      ),
       dataIndex: "tipo",
       key: "tipo",
     },
     {
-      title: "Questão",
+      title: (
+        <div className="min-w-[100px] flex items-center gap-2 justify-center">
+          Questão
+        </div>
+      ),
       dataIndex: "questao",
       key: "questao",
     },
     {
-      title: "Conteúdo",
+      title: (
+        <div className="min-w-[100px] flex items-center gap-2 justify-center">
+          Conteúdo
+        </div>
+      ),
       dataIndex: "conteudo",
       key: "conteudo",
     },
     {
-      title: "Ação",
+      title: <div className="flex items-center gap-2 justify-center">Ação</div>,
       dataIndex: "key",
       key: "acao",
       render: (key: number) => (
@@ -121,10 +148,10 @@ export default function TrainingFiles() {
   return (
     <div className=" w-full mx-auto flex flex-col gap-4 items-center justify-center ">
       <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
-        <span className="text-base text-gray-500 flex items-center gap-2">
+        <span className="w-full md:w-auto text-base text-gray-500 flex items-center gap-2">
           <Cpu size={22} /> Arquivos de Treinamento
         </span>
-        <div className="flex items-center gap-2">
+        <div className="w-full md:w-auto flex justify-end items-center gap-2">
           <Button className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500">
             <View size={16} />
             Ver todos
@@ -139,7 +166,7 @@ export default function TrainingFiles() {
         </div>
       </div>
 
-      <div className="w-full mt-4 p-4">
+      <div className="w-full px-4">
         <Table
           className="bg-transparent rounded-lg"
           bordered={false}
@@ -147,6 +174,7 @@ export default function TrainingFiles() {
           expandable={{
             expandedRowClassName: () => "bg-blue-500",
           }}
+          scroll={{ x: true }}
           columns={columns}
           pagination={false}
         />

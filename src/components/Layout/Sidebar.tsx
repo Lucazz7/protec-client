@@ -7,9 +7,10 @@ import {
   User,
   X,
 } from "lucide-react";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { setChatHistory } from "../../store/redux/chatSlice";
 import { useGetHistoryQuery } from "../../store/services/chatApi";
-
 const listMenu = [
   {
     name: "Nova conversa",
@@ -29,6 +30,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+  const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
 
   const navigate = useNavigate();
@@ -84,17 +86,18 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           isOpen ? "flex flex-col" : "hidden lg:flex lg:flex-col"
         }`}
       >
-        <div className="w-full md:h-[17%] max-h-[130px] flex flex-col py-2   ">
+        <div className="w-full md:h-[18%] max-h-[130px] flex flex-col py-2   ">
           <hr className="w-full border-gray-300 pb-2" />
-          <div className="w-full h-full flex flex-col gap-6  text-gray-500 ">
+          <div className="w-full h-full flex flex-col gap-5 text-gray-500 ">
             {listMenu.map((item, index) =>
               item.name === "Nova conversa" ? (
                 <div
                   key={index}
                   onClick={() => {
                     navigate(item.path);
+                    setIsOpen(false);
                   }}
-                  className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2  rounded-lg transition-all duration-300`}
+                  className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2 cursor-pointer rounded-lg transition-all duration-300`}
                 >
                   {item.icon}
                   <span className="text- uppercase">{item.name}</span>
@@ -104,8 +107,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   key={index}
                   onClick={() => {
                     navigate(item.path);
+                    setIsOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300`}
+                  className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300 cursor-pointer`}
                 >
                   {item.icon}
                   <span className="text-base">{item.name}</span>
@@ -131,6 +135,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   <div
                     key={item.id}
                     onClick={() => {
+                      dispatch(setChatHistory([]));
                       navigate(`/chat/${item.id}`);
                     }}
                     className={`w-full flex items-center gap-3 font-light  p-2 rounded-md transition-all duration-300 text-gray-600 cursor-pointer ${
