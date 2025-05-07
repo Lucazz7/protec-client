@@ -11,6 +11,7 @@ import {
 } from "redux-persist";
 import chatSlice from "./redux/chatSlice";
 import { chatApi } from "./services/chatApi";
+import { trainingFilesApi } from "./services/trainingFiles";
 // import { persistReducer, persistStore } from "redux-persist";
 // import storage from "redux-persist/lib/storage";
 
@@ -26,13 +27,16 @@ export const store = configureStore({
   reducer: {
     chatSlice: chatSlice,
     [chatApi.reducerPath]: chatApi.reducer,
+    [trainingFilesApi.reducerPath]: trainingFilesApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(chatApi.middleware),
+    })
+      .concat(chatApi.middleware)
+      .concat(trainingFilesApi.middleware),
 });
 
 export const persistor = persistStore(store);

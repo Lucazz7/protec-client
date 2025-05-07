@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { setChatHistory } from "../../store/redux/chatSlice";
 import { useGetHistoryQuery } from "../../store/services/chatApi";
 const listMenu = [
@@ -34,6 +34,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
 
   const navigate = useNavigate();
@@ -135,7 +136,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   }}
                   data-aos="zoom-in"
                   data-aos-duration="400"
-                  className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300 cursor-pointer`}
+                  className={`w-full flex items-center gap-3 font-semibold justify-center hover:text-white hover:bg-gray-600 p-2  ${
+                    location.pathname.includes(item.path)
+                      ? "border-1 border-b-2 border-gray-400 text-gray-500"
+                      : ""
+                  } rounded-md transition-all duration-300 cursor-pointer`}
                 >
                   {item.icon}
                   <span className="text-base">{item.name}</span>

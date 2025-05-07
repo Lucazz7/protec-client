@@ -264,7 +264,7 @@ export default function Chat() {
       >
         {/* Header */}
         <div
-          className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center  transition-all duration-500 overflow-hidden
+          className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center transition-all duration-500 overflow-hidden
             ${
               id
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"
@@ -299,7 +299,7 @@ export default function Chat() {
         {id && (
           <div
             ref={chatContainerRef}
-            className={`w-full  overflow-y-auto mx-auto px-2 md:px-0 ${
+            className={`w-full overflow-y-auto mx-auto px-2 md:px-0 ${
               !id || (id && chatHistory.length > 0)
                 ? "h-[72%] min-h-[72%]"
                 : "h-full"

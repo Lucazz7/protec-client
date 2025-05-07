@@ -30,7 +30,7 @@ export default function ChatView({
   }, []);
 
   return (
-    <div className="mx-auto h-full w-full max-w-3xl  pb-6 space-y-6 font-inter text-sm">
+    <div className="mx-auto h-full w-full md:max-w-3xl  pb-6 space-y-6 font-inter text-sm">
       {chatHistory.length > 0 &&
         chatHistory?.map((chat, index) => {
           if (chat.sql || chat.df) {
@@ -46,7 +46,7 @@ export default function ChatView({
                     <div className="font-mono text-xs text-gray-700 mt-2">
                       SQL:
                     </div>
-                    <pre className="bg-gray-100 shadow-sm p-2 rounded text-xs overflow-x-auto w-fit px-5">
+                    <pre className="bg-gray-100  shadow-sm p-2 rounded text-xs overflow-auto  px-5">
                       <ReactMarkdown>{chat?.sql}</ReactMarkdown>
                     </pre>
                   </div>

@@ -1,10 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Modal, Popconfirm, Table } from "antd";
-import { Cpu, Plus, Trash, View } from "lucide-react";
-import { useState } from "react";
+import { Cpu, Loader2, Plus, Trash, View } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import ReactMarkdown from "react-markdown";
 
 import { z } from "zod";
+import { useGetTrainingFilesQuery } from "../store/services/trainingFiles";
 
 // Schema de validação com zod
 const schema = z.object({
@@ -19,6 +21,8 @@ type FormData = z.infer<typeof schema>;
 export default function TrainingFiles() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewAll, setViewAll] = useState(false);
+
+  const { data: trainingFiles, isLoading } = useGetTrainingFilesQuery();
 
   const {
     register,
@@ -37,61 +41,37 @@ export default function TrainingFiles() {
     setIsModalOpen(false);
   };
 
-  // Troque o dataSource para um estado
-  const [dataSource, setDataSource] = useState<
-    {
-      key: number;
-      acao: React.ReactNode;
-      questao: React.ReactNode;
-      conteudo: React.ReactNode;
-      tipo: React.ReactNode;
-    }[]
-  >([
-    {
-      key: 1,
-      acao: null, // Será preenchido depois
+  // Função para transformar os dados da API no formato da tabela
+  const getTableData = useMemo(() => {
+    if (!trainingFiles?.df) return [];
+
+    const parsedData = JSON.parse(trainingFiles.df);
+
+    return parsedData.map((item: any, index: number) => ({
+      key: index,
+      acao: <div className="min-w-[140px]"></div>,
       questao: (
-        <div className="flex flex-col gap-2 min-w-[200px]">
-          Quais são os pedidos que foram cancelados e quantos produtos estão
-          ativos no sistema hoje?
+        <div className="min-w-[140px] max-w-[300px]">
+          {item?.question || "Não há questão"}
         </div>
       ),
       conteudo: (
-        <div className="w-fit flex flex-col gap-2 min-w-[250px]">
-          <p className="py-1 px-2 bg-gray-100 rounded-lg">
-            SELECT COUNT(*) FROM PRODUTO WHERE PRODUTO.ativo = 1;
-          </p>
+        <div className="flex flex-col gap-2 max-h-72 overflow-hidden max-w-[600px]">
+          <pre className="bg-gray-100 p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col text-wrap ">
+            <ReactMarkdown>{item.content}</ReactMarkdown>
+          </pre>
         </div>
       ),
       tipo: (
-        <div className="flex items-center gap-2 max-w-[100px] justify-center">
-          SQL
+        <div className="flex items-center gap-2 justify-center min-w-[140px]">
+          {item.training_data_type.toUpperCase()}
         </div>
       ),
-    },
-  ]);
-
-  // Função para remover item
-  const handleRemove = (key: number) => {
-    setDataSource((prev) => prev.filter((item) => item.key !== key));
-  };
+    }));
+  }, [trainingFiles]);
 
   // Função para adicionar novo item
   const onSubmit = (data: FormData) => {
-    setDataSource((prev) => [
-      ...prev,
-      {
-        key: prev.length + 1,
-        acao: null, // Será preenchido depois
-        questao: "", // Você pode adicionar um campo de questão no formulário se quiser
-        conteudo: (
-          <div className="flex flex-col gap-2">
-            <p className="py-1 px-2 bg-gray-100 rounded-lg">{data.sql}</p>
-          </div>
-        ),
-        tipo: data.tipoDado,
-      },
-    ]);
     setIsModalOpen(false);
     reset();
   };
@@ -100,7 +80,7 @@ export default function TrainingFiles() {
   const columns = [
     {
       title: (
-        <div className="min-w-[100px] flex items-center gap-2 justify-center">
+        <div className="min-w-20 md:min-w-[140px] flex items-center gap-2 justify-center">
           Tipo de Dado
         </div>
       ),
@@ -109,7 +89,7 @@ export default function TrainingFiles() {
     },
     {
       title: (
-        <div className="min-w-[100px] flex items-center gap-2 justify-center">
+        <div className="max-w-[300px]  flex items-center gap-2 justify-center">
           Questão
         </div>
       ),
@@ -118,7 +98,7 @@ export default function TrainingFiles() {
     },
     {
       title: (
-        <div className="min-w-[100px] flex items-center gap-2 justify-center">
+        <div className="w-full flex items-center gap-2 justify-center">
           Conteúdo
         </div>
       ),
@@ -126,14 +106,18 @@ export default function TrainingFiles() {
       key: "conteudo",
     },
     {
-      title: <div className="flex items-center gap-2 justify-center">Ação</div>,
+      title: (
+        <div className="min-w-[140px] flex items-center gap-2 justify-center">
+          Ação
+        </div>
+      ),
       dataIndex: "key",
       key: "acao",
       render: (key: number) => (
         <Popconfirm
           title="Remover"
           description="Tem certeza que deseja remover este dado de treinamento?"
-          onConfirm={() => handleRemove(key)}
+          onConfirm={() => {}}
           okText="Sim"
           cancelText="Não"
         >
@@ -147,8 +131,8 @@ export default function TrainingFiles() {
   ];
 
   return (
-    <div className=" w-full mx-auto flex flex-col gap-4 items-center justify-center ">
-      <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
+    <div className="w-full h-full mx-auto flex flex-col overflow-hidden">
+      <div className="w-full p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
         <span className="w-full md:w-auto text-base text-gray-500 flex items-center gap-2">
           <Cpu size={22} /> Arquivos de Treinamento
         </span>
@@ -156,10 +140,10 @@ export default function TrainingFiles() {
           <Button
             className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
             onClick={() => setViewAll(!viewAll)}
-            disabled={dataSource.length <= 10}
+            disabled={getTableData.length <= 10}
           >
             <View size={16} />
-            {viewAll && dataSource.length > 10 ? "Ver menos" : "Ver todos"}
+            {viewAll && getTableData.length > 10 ? "Ver menos" : "Ver todos"}
           </Button>
           <Button
             className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
@@ -170,26 +154,38 @@ export default function TrainingFiles() {
           </Button>
         </div>
       </div>
-      <div className="w-full px-4">
-        <div className="w-full bg-white rounded-lg">
-          <Table
-            className="bg-transparent rounded-lg"
-            bordered={false}
-            dataSource={dataSource}
-            expandable={{
-              expandedRowClassName: () => "bg-blue-500",
-            }}
-            scroll={{ x: true }}
-            columns={columns}
-            pagination={
-              !viewAll && dataSource.length > 10
-                ? {
-                    pageSize: 10,
-                    position: ["bottomCenter"],
-                  }
-                : false
-            }
-          />
+      <div className="w-full h-full p-4">
+        <div className="w-full bg-white rounded-lg h-full">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 size={24} className="animate-spin" />
+            </div>
+          ) : (
+            <Table
+              className="bg-transparent rounded-lg h-full"
+              bordered={false}
+              dataSource={getTableData}
+              expandable={{
+                expandedRowClassName: () => "bg-blue-500",
+              }}
+              columns={columns}
+              scroll={{
+                x: true,
+                y:
+                  !viewAll && getTableData.length < 10
+                    ? "calc(100vh - 220px)"
+                    : "calc(100vh - 260px)",
+              }}
+              pagination={
+                !viewAll && getTableData.length > 10
+                  ? {
+                      pageSize: 10,
+                      position: ["bottomCenter"],
+                    }
+                  : false
+              }
+            />
+          )}
         </div>
       </div>
       <Modal open={isModalOpen} onCancel={handleCancel} footer={null}>
