@@ -1,5 +1,5 @@
 // const API_URL = "http://localhost:3001/api/chats";
-const API_URL = "https://protec.biofy.tech/api/v0/";
+const API_URL = "http://localhost:8084/api/v0/";
 import { IHistoryQuestion, Message } from "../../interface/IChat";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";

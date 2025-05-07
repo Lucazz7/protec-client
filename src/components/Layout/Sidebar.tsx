@@ -24,6 +24,9 @@ const listMenu = [
   },
 ];
 
+import AOS from "aos";
+import { useEffect } from "react";
+
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -40,6 +43,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     isLoading: isLoadingHistory,
     isFetching: isFetchingHistory,
   } = useGetHistoryQuery();
+
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
 
   return (
     <div
@@ -58,6 +68,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           onClick={() => {
             navigate("/chat");
           }}
+          data-aos="fade-right"
+          data-aos-duration="1000"
         >
           <img
             src="/image/svg/fav-icon-biofy.svg"
@@ -66,8 +78,18 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           />
         </div>
         <div className="hidden lg:flex w-full items-center">
-          <span className="text-2xl font-semibold text-gray-700">Protec</span>
-          <span className="text-sm text-gray-500 pt-11 -ms-4 -mt-2">
+          <span
+            className="text-2xl font-semibold text-gray-700"
+            data-aos="fade-right"
+            data-aos-duration="1000"
+          >
+            Protec
+          </span>
+          <span
+            className="text-sm text-gray-500 pt-11 -ms-4 -mt-2"
+            data-aos="fade-left"
+            data-aos-duration="1000"
+          >
             AI Chatbot
           </span>
         </div>
@@ -97,6 +119,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     navigate(item.path);
                     setIsOpen(false);
                   }}
+                  data-aos="zoom-in"
+                  data-aos-duration="400"
                   className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  hover:text-white hover:bg-gray-700 p-2 cursor-pointer rounded-lg transition-all duration-300`}
                 >
                   {item.icon}
@@ -109,6 +133,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     navigate(item.path);
                     setIsOpen(false);
                   }}
+                  data-aos="zoom-in"
+                  data-aos-duration="400"
                   className={`w-full flex items-center gap-3 font-semibold  hover:text-white hover:bg-gray-600 p-2  rounded-md transition-all duration-300 cursor-pointer`}
                 >
                   {item.icon}
@@ -120,7 +146,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </div>
         <div className="w-full h-[70%] md:h-[80%] flex flex-col">
           <hr className="w-full border-gray-300" />
-          <div className="w-full h-full  overflow-y-auto flex flex-col py-4 text-black ">
+          <div
+            className="w-full h-full  overflow-y-auto flex flex-col py-4 text-black"
+            data-aos="fade-up"
+            data-aos-duration="600"
+          >
             <span className="w-full text-sm text-gray-500 text-center flex items-center gap-2 px-2 pb-2">
               <History size={20} />
               Conversas Recentes
@@ -167,9 +197,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>
         </div>
       </div>
-      <div className="w-full hidden lg:flex flex-col mt-auto ">
+      <div className="w-full hidden lg:flex flex-col mt-auto">
         <hr className="w-full border-gray-300" />
-        <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
+        <div className="w-full py-4 flex items-center gap-2 justify-between px-2">
           <div className="w-auto p-2 bg-gray-300 rounded-full">
             <User size={20} />
           </div>

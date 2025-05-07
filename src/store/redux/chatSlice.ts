@@ -24,19 +24,24 @@ const chatSlice = createSlice({
     builder.addMatcher(
       chatApi.endpoints.getChatById.matchFulfilled,
       (state, action) => {
-        state.chatHistory = action.payload?.id
-          ? [
-              {
-                id: action.payload?.id,
-                type: "user",
-                question: action.payload?.question,
-              },
-              {
-                ...action.payload,
-                id: action.payload?.id,
-              },
-            ]
-          : [];
+        if (action.payload.error && !action.payload?.id) {
+          state.error =
+            "Não foi possível carregar os dados de histórico de conversas";
+        } else {
+          state.chatHistory = action.payload?.id
+            ? [
+                {
+                  id: action.payload?.id,
+                  type: "user",
+                  question: action.payload?.question,
+                },
+                {
+                  ...action.payload,
+                  id: action.payload?.id,
+                },
+              ]
+            : [];
+        }
       }
     );
     builder.addMatcher(chatApi.endpoints.getChatById.matchRejected, (state) => {

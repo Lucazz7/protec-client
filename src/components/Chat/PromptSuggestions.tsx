@@ -12,6 +12,8 @@ export default function PromptSuggestions({
         onClick={() =>
           setMessage("Como otimizar uma consulta SQL que está muito lenta?")
         }
+        data-aos="fade-up"
+        data-aos-duration="400"
       >
         <div className="mb-2">📊</div>
         <p className="text-xs text-gray-700">
@@ -23,6 +25,8 @@ export default function PromptSuggestions({
         onClick={() =>
           setMessage("Ajude-me a criar uma query com JOIN entre várias tabelas")
         }
+        data-aos="fade-up"
+        data-aos-duration="700"
       >
         <div className="mb-2">🔍</div>
         <p className="text-xs text-gray-700">
@@ -36,6 +40,8 @@ export default function PromptSuggestions({
             "Como criar uma consulta para análise de dados com GROUP BY"
           )
         }
+        data-aos="fade-up"
+        data-aos-duration="900"
       >
         <div className="mb-2">📈</div>
         <p className="text-xs text-gray-700">
@@ -49,6 +55,8 @@ export default function PromptSuggestions({
             "Preciso converter uma subquery em uma CTE, pode me ajudar?"
           )
         }
+        data-aos="fade-up"
+        data-aos-duration="1200"
       >
         <div className="mb-2">🔄</div>
         <p className="text-xs text-gray-700">

@@ -18,6 +18,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function TrainingFiles() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
 
   const {
     register,
@@ -152,9 +153,13 @@ export default function TrainingFiles() {
           <Cpu size={22} /> Arquivos de Treinamento
         </span>
         <div className="w-full md:w-auto flex justify-end items-center gap-2">
-          <Button className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500">
+          <Button
+            className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
+            onClick={() => setViewAll(!viewAll)}
+            disabled={dataSource.length <= 10}
+          >
             <View size={16} />
-            Ver todos
+            {viewAll && dataSource.length > 10 ? "Ver menos" : "Ver todos"}
           </Button>
           <Button
             className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
@@ -165,19 +170,27 @@ export default function TrainingFiles() {
           </Button>
         </div>
       </div>
-
       <div className="w-full px-4">
-        <Table
-          className="bg-transparent rounded-lg"
-          bordered={false}
-          dataSource={dataSource}
-          expandable={{
-            expandedRowClassName: () => "bg-blue-500",
-          }}
-          scroll={{ x: true }}
-          columns={columns}
-          pagination={false}
-        />
+        <div className="w-full bg-white rounded-lg">
+          <Table
+            className="bg-transparent rounded-lg"
+            bordered={false}
+            dataSource={dataSource}
+            expandable={{
+              expandedRowClassName: () => "bg-blue-500",
+            }}
+            scroll={{ x: true }}
+            columns={columns}
+            pagination={
+              !viewAll && dataSource.length > 10
+                ? {
+                    pageSize: 10,
+                    position: ["bottomCenter"],
+                  }
+                : false
+            }
+          />
+        </div>
       </div>
       <Modal open={isModalOpen} onCancel={handleCancel} footer={null}>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">

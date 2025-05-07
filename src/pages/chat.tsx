@@ -16,6 +16,8 @@ import {
   useGetChatByIdQuery,
 } from "../store/services/chatApi";
 
+import AOS from "aos";
+
 export default function Chat() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -220,6 +222,13 @@ export default function Chat() {
     scrollToBottom();
   }, [isAdding, isCreating, chatHistory]);
 
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+
   return (
     <div className="w-full h-full flex flex-col font-inter overflow-y-auto">
       {id && (
@@ -285,9 +294,13 @@ export default function Chat() {
           </div>
         )}
         {/* Input do chat */}
-        {(!isLoadingChat && !isFetching && !error) || !id ? (
+        {(!isLoadingChat && !isFetching && !error) ||
+        !id ||
+        chatHistory.length > 0 ? (
           <div
             className={`w-full md:h-[25%] max-w-3xl mx-auto mb-4 px-2 mt-auto`}
+            data-aos="zoom-in"
+            data-aos-duration="700"
           >
             <ChatInput
               message={chatMessage}

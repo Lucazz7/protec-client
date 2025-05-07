@@ -2,8 +2,10 @@ import { Button, Table } from "antd";
 import { AlertCircle, Plus, RefreshCcwDot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Message } from "../../interface/IChat";
+import { setChatHistory } from "../../store/redux/chatSlice";
 interface ChatViewProps {
   chatHistory: Message[];
   isLoading: boolean;
@@ -16,6 +18,7 @@ export default function ChatView({
   error,
 }: ChatViewProps) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   return (
     <div className="mx-auto h-full w-full max-w-3xl  pb-6 space-y-6 font-inter text-sm">
       {chatHistory.length > 0 &&
@@ -149,7 +152,7 @@ export default function ChatView({
         <div className="flex justify-center items-center ">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-800 my-6"></div>
         </div>
-      ) : error ? (
+      ) : error && chatHistory.length === 0 ? (
         <div className="w-full h-full flex flex-col justify-center items-center">
           <img
             src={"/image/No data-bro.png"}
@@ -170,6 +173,7 @@ export default function ChatView({
               className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
               onClick={() => {
                 navigate("/");
+                dispatch(setChatHistory([]));
               }}
             >
               <Plus className="text-gray-500" size={16} />

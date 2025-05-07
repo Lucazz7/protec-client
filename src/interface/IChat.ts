@@ -1,6 +1,6 @@
 export interface Message {
   id: string;
-  type: "user" | "text" | "question_cache" | "df" | "sql";
+  type: "user" | "text" | "question_cache" | "df" | "sql" | "error";
   question?: string;
   should_generate_chart?: boolean;
   text?: string;
@@ -8,6 +8,7 @@ export interface Message {
   df?: string;
   fig?: string;
   summary?: string | null;
+  error?: string | null;
 }
 
 export interface IQuestion {
