@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Message } from "../../interface/IChat";
 import { chatApi } from "../services/chatApi";
 
@@ -16,7 +16,7 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    setChatHistory: (state, action) => {
+    setChatHistory: (state, action: PayloadAction<Message[]>) => {
       state.chatHistory = action.payload;
     },
   },
@@ -27,7 +27,9 @@ const chatSlice = createSlice({
         if (action.payload.error && !action.payload?.id) {
           state.error =
             "Não foi possível carregar os dados de histórico de conversas";
-        } else {
+        } else if (
+          !state.chatHistory.some((chat) => chat.id !== action.payload?.id)
+        ) {
           state.chatHistory = action.payload?.id
             ? [
                 {

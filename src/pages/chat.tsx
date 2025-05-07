@@ -17,6 +17,7 @@ import {
 } from "../store/services/chatApi";
 
 import AOS from "aos";
+import { Message } from "../interface/IChat";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -54,80 +55,85 @@ export default function Chat() {
     const currentMessage = chatMessage;
     setChatMessage("");
 
-    // Adiciona a mensagem do usuário imediatamente ao histórico
-    dispatch(
-      setChatHistory([
-        ...chatHistory,
-        {
-          id: "",
-          type: "user",
-          question: currentMessage,
-        },
-      ])
-    );
+    // Adiciona a mensagem do usuário ao histórico
+    const updatedHistory: Message[] = [
+      ...chatHistory,
+      {
+        id: "",
+        type: "user",
+        question: currentMessage,
+      },
+    ];
+    dispatch(setChatHistory(updatedHistory));
 
     // Pega a última pergunta do usuário
     const lastUserMessage = [...chatHistory]
       .reverse()
       .find((msg) => msg.type === "user" && msg.question);
 
-    const last_question = lastUserMessage?.question
-      ? lastUserMessage?.question
-      : "";
+    const last_question = lastUserMessage?.question || "";
     const new_question = currentMessage;
 
-    const response = addMessage({
+    addMessage({
       last_question,
       new_question,
-    });
-
-    response.then((res) => {
+    }).then((res) => {
       if (res.error) {
         toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
         setChatMessage(currentMessage);
-        // Remove a mensagem do usuário adicionada caso dê erro
-        dispatch(setChatHistory(chatHistory.slice(0, -1)));
-      } else {
-        const response = createChat({ question: currentMessage });
+        // Remove a mensagem do usuário em caso de erro
+        dispatch(setChatHistory(chatHistory));
+        return;
+      }
 
-        response.then((res) => {
-          if (res.error) {
-            toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
-            setChatMessage(currentMessage);
-            // Remove a mensagem do usuário adicionada caso dê erro
-            dispatch(setChatHistory(chatHistory.slice(0, -1)));
-          } else {
+      createChat({ question: currentMessage }).then((res) => {
+        if (res.error) {
+          toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
+          setChatMessage(currentMessage);
+          dispatch(setChatHistory(chatHistory));
+          return;
+        }
+
+        // Adiciona a resposta da API ao histórico
+        const newHistory: Message[] = [
+          ...updatedHistory,
+          {
+            ...res.data,
+            question: res.data.text,
+          },
+        ];
+        dispatch(setChatHistory(newHistory));
+
+        // Se for SQL, gera o SQL
+        if (res.data.type === "sql") {
+          chatGenerateSql(res.data.id).then((sqlRes) => {
+            if (sqlRes.error || sqlRes.data.error) {
+              toast.error("Erro ao rodar SQL.");
+              dispatch(
+                setChatHistory([
+                  ...newHistory,
+                  {
+                    id: res.data.id,
+                    type: "error",
+                    question: sqlRes?.data?.error || "Erro ao rodar SQL",
+                  },
+                ])
+              );
+              return;
+            }
+            // Adiciona a resposta do SQL ao histórico
             dispatch(
               setChatHistory([
-                ...chatHistory,
+                ...newHistory,
                 {
-                  ...res?.data,
-                  question: res.data.text,
+                  ...sqlRes.data,
+                  question: sqlRes.data.text,
                 },
               ])
             );
-            if (res.data.type === "sql") {
-              const response = chatGenerateSql(res.data.id);
-
-              response.then((res) => {
-                if (res.error) {
-                  toast.error("Erro ao gerar SQL. Por favor, tente novamente.");
-                } else {
-                  dispatch(
-                    setChatHistory([
-                      ...chatHistory,
-                      {
-                        ...res?.data,
-                        question: res?.data.text,
-                      },
-                    ])
-                  );
-                }
-              });
-            }
-          }
-        });
-      }
+          });
+        }
+      });
     });
   }, [
     id,
@@ -140,56 +146,69 @@ export default function Chat() {
   ]);
 
   const handleCreateChat = useCallback(() => {
-    // Adiciona a mensagem do usuário imediatamente ao histórico
-    dispatch(
-      setChatHistory([
-        ...chatHistory,
-        {
-          id: "",
-          type: "user",
-          question: chatMessage,
-        },
-      ])
-    );
+    const currentMessage = chatMessage;
+    setChatMessage("");
 
-    const response = createChat({ question: chatMessage });
+    // Adiciona a mensagem do usuário ao histórico
+    const updatedHistory: Message[] = [
+      ...chatHistory,
+      {
+        id: "",
+        type: "user",
+        question: currentMessage,
+      },
+    ];
+    dispatch(setChatHistory(updatedHistory));
 
-    response.then((res) => {
+    createChat({ question: currentMessage }).then((res) => {
       if (res.error) {
         toast.error("Erro ao enviar mensagem!");
-        // Remove a mensagem do usuário adicionada caso dê erro
-        dispatch(setChatHistory(chatHistory.slice(0, -1)));
-      } else {
-        navigate(`/chat/${res.data.id}`);
-        dispatch(
-          setChatHistory([
-            ...chatHistory,
-            {
-              ...res?.data,
-              question: res.data.text,
-            },
-          ])
-        );
-        if (res.data.type === "sql") {
-          const response = chatGenerateSql(res.data.id);
+        setChatMessage(currentMessage);
+        dispatch(setChatHistory(chatHistory));
+        return;
+      }
 
-          response.then((res) => {
-            if (res.error) {
-              toast.error("Erro ao gerar SQL!");
-            } else {
-              dispatch(
-                setChatHistory([
-                  ...chatHistory,
-                  {
-                    ...res?.data,
-                    question: res?.data.text,
-                  },
-                ])
-              );
-            }
-          });
-        }
-        setChatMessage("");
+      // Navega para o novo chat
+      navigate(`/chat/${res.data.id}`);
+
+      // Adiciona a resposta da API ao histórico
+      const newHistory: Message[] = [
+        ...updatedHistory,
+        {
+          ...res.data,
+          question: res.data.text,
+        },
+      ];
+      dispatch(setChatHistory(newHistory));
+
+      // Se for SQL, gera o SQL
+      if (res.data.type === "sql") {
+        chatGenerateSql(res.data.id).then((sqlRes) => {
+          if (sqlRes.error || sqlRes.data.error) {
+            toast.error("Erro ao rodar o SQL.");
+            dispatch(
+              setChatHistory([
+                ...newHistory,
+                {
+                  id: res.data.id,
+                  type: "error",
+                  question: sqlRes?.data?.error || "",
+                },
+              ])
+            );
+            return;
+          }
+          // Adiciona a resposta do SQL ao histórico
+          dispatch(
+            setChatHistory([
+              ...newHistory,
+              {
+                ...sqlRes.data,
+                question: sqlRes.data.text,
+              },
+            ])
+          );
+        });
       }
     });
   }, [
