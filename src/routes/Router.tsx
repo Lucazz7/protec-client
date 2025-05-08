@@ -1,5 +1,5 @@
 /* eslint-disable no-constant-condition */
-import { JSX, useEffect, useMemo } from "react";
+import { JSX } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "../components/Layout/Layout";
 import Chat from "../pages/chat";
@@ -17,16 +17,6 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 export function Router() {
   // const { useAuth } = useAppSelector(userAuth);
   // const isAuthenticated = useAuth?.jwt && useAuth?.isAuthenticated;
-
-  const darkMode = useMemo(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
 
   const publicRoutes = [{ path: "/login", element: <Login /> }];
 

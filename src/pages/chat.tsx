@@ -60,7 +60,7 @@ export default function Chat() {
       ...chatHistory,
       {
         id: "",
-        type: "user",
+        response_type: "user",
         question: currentMessage,
       },
     ];
@@ -69,7 +69,7 @@ export default function Chat() {
     // Pega a última pergunta do usuário
     const lastUserMessage = [...chatHistory]
       .reverse()
-      .find((msg) => msg.type === "user" && msg.question);
+      .find((msg) => msg.response_type === "user" && msg.question);
 
     const last_question = lastUserMessage?.question || "";
     const new_question = currentMessage;
@@ -99,51 +99,16 @@ export default function Chat() {
           ...updatedHistory,
           {
             ...res.data,
-            question: res.data.text,
+            question: res.data.response,
+            id: res.data.vanna_question.id.toString(),
           },
         ];
         dispatch(setChatHistory(newHistory));
 
         // Se for SQL, gera o SQL
-        if (res.data.type === "sql") {
-          chatGenerateSql(res.data.id).then((sqlRes) => {
-            if (sqlRes.error || sqlRes.data.error) {
-              toast.error("Erro ao rodar SQL.");
-              dispatch(
-                setChatHistory([
-                  ...newHistory,
-                  {
-                    id: res.data.id,
-                    type: "error",
-                    question: sqlRes?.data?.error || "Erro ao rodar SQL",
-                  },
-                ])
-              );
-              return;
-            }
-            // Adiciona a resposta do SQL ao histórico
-            dispatch(
-              setChatHistory([
-                ...newHistory,
-                {
-                  ...sqlRes.data,
-                  question: sqlRes.data.text,
-                },
-              ])
-            );
-          });
-        }
       });
     });
-  }, [
-    id,
-    chatMessage,
-    dispatch,
-    chatHistory,
-    addMessage,
-    createChat,
-    chatGenerateSql,
-  ]);
+  }, [id, chatMessage, dispatch, chatHistory, addMessage, createChat]);
 
   const handleCreateChat = useCallback(() => {
     const currentMessage = chatMessage;
@@ -154,10 +119,11 @@ export default function Chat() {
       ...chatHistory,
       {
         id: "",
-        type: "user",
+        response_type: "user",
         question: currentMessage,
       },
     ];
+
     dispatch(setChatHistory(updatedHistory));
 
     createChat({ question: currentMessage }).then((res) => {
@@ -167,58 +133,25 @@ export default function Chat() {
         dispatch(setChatHistory(chatHistory));
         return;
       }
-
-      // Navega para o novo chat
-      navigate(`/chat/${res.data.id}`);
-
+      if (res?.data?.vanna_question?.id) {
+        // Navega para o novo chat
+        navigate(`/chat/${res.data.vanna_question.id}`);
+      }
       // Adiciona a resposta da API ao histórico
       const newHistory: Message[] = [
         ...updatedHistory,
         {
-          ...res.data,
-          question: res.data.text,
+          id: res?.data?.vanna_question?.id?.toString() ?? "",
+          response_type: res?.data?.response_type,
+          question:
+            res?.data?.response || res?.data?.vanna_question?.generated_sql,
         },
       ];
       dispatch(setChatHistory(newHistory));
-
-      // Se for SQL, gera o SQL
-      if (res.data.type === "sql") {
-        chatGenerateSql(res.data.id).then((sqlRes) => {
-          if (sqlRes.error || sqlRes.data.error) {
-            toast.error("Erro ao rodar o SQL.");
-            dispatch(
-              setChatHistory([
-                ...newHistory,
-                {
-                  id: res.data.id,
-                  type: "error",
-                  question: sqlRes?.data?.error || "",
-                },
-              ])
-            );
-            return;
-          }
-          // Adiciona a resposta do SQL ao histórico
-          dispatch(
-            setChatHistory([
-              ...newHistory,
-              {
-                ...sqlRes.data,
-                question: sqlRes.data.text,
-              },
-            ])
-          );
-        });
-      }
     });
-  }, [
-    chatGenerateSql,
-    chatHistory,
-    chatMessage,
-    createChat,
-    dispatch,
-    navigate,
-  ]);
+  }, [chatHistory, chatMessage, createChat, dispatch, navigate]);
+
+  console.log(chatHistory);
 
   const handleSendMessage = useCallback(() => {
     if (!id) {
@@ -250,14 +183,14 @@ export default function Chat() {
 
   return (
     <div className="w-full h-full flex flex-col font-inter overflow-y-auto">
-      {id && (
-        <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
+      {chatHistory.length > 0 && (
+        <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm dark:bg-gray-900">
           <HeaderChatView setMessage={setChatMessage} />
         </div>
       )}
       <div
         className={`w-full ${
-          id
+          chatHistory.length > 0
             ? "h-[70%] min-[400px]:h-[75%] min-[400px]:min-h-[75%] md:h-[92%] md:min-[400px]:min-h-[92%]"
             : "h-full md:h-auto  md:my-auto"
         } mx-auto flex flex-col py-4 md:py-0 md:justify-center gap-2 md:gap-7 md:px-2`}
@@ -266,7 +199,7 @@ export default function Chat() {
         <div
           className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center transition-all duration-500 overflow-hidden
             ${
-              id
+              chatHistory.length > 0
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"
                 : "max-h-[1000px] opacity-100 translate-y-0"
             }
@@ -287,7 +220,7 @@ export default function Chat() {
                 gradientColors="from-blue-800 to-pink-600"
               />
             </h2>
-            <p className="text-gray-500 text-sm sm:text-base md:text-base">
+            <p className="text-gray-500 dark:text-gray-300 text-sm sm:text-base md:text-base">
               Transforme seus dados em resultados eficientes
             </p>
           </div>
@@ -296,7 +229,7 @@ export default function Chat() {
           <PromptSuggestions setMessage={setChatMessage} />
         </div>
         {/* Chat Area */}
-        {id && (
+        {chatHistory.length > 0 && (
           <div
             ref={chatContainerRef}
             className={`w-full overflow-y-auto mx-auto px-2 md:px-0 ${

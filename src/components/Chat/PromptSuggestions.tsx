@@ -8,20 +8,20 @@ export default function PromptSuggestions({
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 p-2 my-auto">
       <div
-        className="bg-white p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 hover:scale-105 transition-all duration-300 cursor-pointer"
+        className="bg-white dark:bg-[#10182852] p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:brightness-125 transition-all duration-300 cursor-pointer"
         onClick={() =>
           setMessage("Como otimizar uma consulta SQL que está muito lenta?")
         }
-        data-aos="fade-up"
-        data-aos-duration="400"
+        // data-aos="fade-up"
+        // data-aos-duration="400"
       >
         <div className="mb-2">📊</div>
-        <p className="text-xs text-gray-700">
+        <p className="text-xs text-gray-700 dark:text-gray-300">
           Como otimizar uma consulta SQL que está muito lenta?
         </p>
       </div>
       <div
-        className="bg-white p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 hover:scale-105 transition-all duration-300 cursor-pointer"
+        className="bg-white dark:bg-[#10182852] p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:brightness-125 transition-all duration-300 cursor-pointer"
         onClick={() =>
           setMessage("Ajude-me a criar uma query com JOIN entre várias tabelas")
         }
@@ -29,12 +29,12 @@ export default function PromptSuggestions({
         data-aos-duration="700"
       >
         <div className="mb-2">🔍</div>
-        <p className="text-xs text-gray-700">
+        <p className="text-xs text-gray-700 dark:text-gray-300">
           Ajude-me a criar uma query com JOIN entre várias tabelas
         </p>
       </div>
       <div
-        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center text-center hover:bg-gray-100 hover:scale-105 transition-all duration-300 cursor-pointer"
+        className="bg-white dark:bg-[#10182852] p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:brightness-125 transition-all duration-300 cursor-pointer"
         onClick={() =>
           setMessage(
             "Como criar uma consulta para análise de dados com GROUP BY"
@@ -44,12 +44,12 @@ export default function PromptSuggestions({
         data-aos-duration="900"
       >
         <div className="mb-2">📈</div>
-        <p className="text-xs text-gray-700">
+        <p className="text-xs text-gray-700 dark:text-gray-300">
           Como criar uma consulta para análise de dados com GROUP BY
         </p>
       </div>
       <div
-        className="bg-white p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 hover:scale-105 transition-all duration-300 cursor-pointer"
+        className="bg-white dark:bg-[#10182852] p-4 rounded-lg shadow-sm  flex flex-col items-center text-center hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:brightness-125 transition-all duration-300 cursor-pointer"
         onClick={() =>
           setMessage(
             "Preciso converter uma subquery em uma CTE, pode me ajudar?"
@@ -59,7 +59,7 @@ export default function PromptSuggestions({
         data-aos-duration="1200"
       >
         <div className="mb-2">🔄</div>
-        <p className="text-xs text-gray-700">
+        <p className="text-xs text-gray-700 dark:text-gray-300">
           Preciso converter uma subquery em uma CTE, pode me ajudar?
         </p>
       </div>

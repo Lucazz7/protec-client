@@ -11,7 +11,7 @@ export default function Layout() {
       <Toaster position="top-right" containerClassName="mt-2 me-2" />
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
       <div className="w-full h-full flex flex-col relative overflow-hidden">
-        <div className="bg-[#ffffff75] w-full h-[calc(100lvh-8rem)] min-[400px]:h-[calc(100dvh-100px)] lg:h-full relative z-10 shadow-md  rounded-2xl">
+        <div className="bg-[#ffffff75] dark:bg-[#131324b4] w-full h-[calc(100lvh-8rem)] min-[400px]:h-[calc(100dvh-100px)] lg:h-full relative z-10 shadow-md  rounded-2xl">
           <Outlet />
         </div>
       </div>

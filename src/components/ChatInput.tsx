@@ -35,17 +35,22 @@ export default function ChatInput({
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="w-full border border-gray-100 rounded-xl shadow-sm bg-white overflow-hidden">
+      <div
+        className={`w-full border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm bg-white dark:bg-[#10182898] overflow-hidden ${
+          isLoading ? "opacity-60" : ""
+        }`}
+      >
         <div className="p-3">
           <TextArea
             placeholder="Faça-me uma pergunta sobre seus dados que eu possa transformar em SQL"
-            className="resize-none text-base"
+            className="resize-none text-base dark:!text-gray-300 placeholder:!text-gray-500 dark:!placeholder:text-gray-200"
             rows={3}
             autoSize={{ minRows: 3, maxRows: 4 }}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             maxLength={3000}
             bordered={false}
+            disabled={isLoading}
             onKeyDown={handleKeyDown}
           />
         </div>
@@ -56,8 +61,9 @@ export default function ChatInput({
             <Button
               type="text"
               size="small"
-              className="!text-gray-500 hover:text-gray-700 flex items-center !gap-1.5"
+              className="!text-gray-500 hover:!text-gray-700 dark:!text-gray-300 dark:hover:!text-gray-500 flex items-center !gap-1.5"
               onClick={handleAttachClick}
+              disabled={isLoading}
               icon={<PaperClipOutlined />}
             >
               Anexo
@@ -66,8 +72,9 @@ export default function ChatInput({
             <Button
               type="text"
               size="small"
-              className="!text-gray-500 hover:text-gray-700 flex items-center !gap-1.5"
+              className="!text-gray-500 hover:!text-gray-700 dark:!text-gray-300 dark:hover:!text-gray-500 flex items-center !gap-1.5"
               icon={<AudioOutlined />}
+              disabled={isLoading}
             >
               Audio
             </Button>
@@ -80,6 +87,7 @@ export default function ChatInput({
                   className="!text-gray-500 hover:text-gray-700 !flex !items-center !gap-1.5"
                   icon={<Trash2 size={14} />}
                   onClick={() => onClearMessage()}
+                  disabled={isLoading}
                 >
                   Limpar
                 </Button>
@@ -88,11 +96,13 @@ export default function ChatInput({
           </div>
 
           <div className="flex gap-2 items-center">
-            <div className="text-xs text-gray-500">{message.length}/3000</div>
+            <div className="text-xs text-gray-500 dark:text-gray-300">
+              {message.length}/3000
+            </div>
             <Button
               type="text"
               size="small"
-              className="!text-gray-500 hover:text-gray-700"
+              className="!text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               onClick={() => onSendMessage()}
               disabled={isLoading || message.length === 0}
             >
@@ -102,7 +112,9 @@ export default function ChatInput({
                 <SendHorizontal
                   size={16}
                   className={`${
-                    message.length > 0 ? "text-violet-700" : "text-gray-500"
+                    message.length > 0
+                      ? "text-violet-700 dark:text-violet-500"
+                      : "text-gray-500 dark:text-gray-300"
                   }`}
                 />
               )}

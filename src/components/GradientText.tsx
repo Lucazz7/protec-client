@@ -16,7 +16,7 @@ export default function GradientText({
       className={`${className} flex flex-row justify-center items-center gap-2`}
     >
       <span
-        className="text-gray-800"
+        className="text-gray-800 dark:text-blue-200"
         data-aos="fade-right"
         data-aos-duration="600"
       >

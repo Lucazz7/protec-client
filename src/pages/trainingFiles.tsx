@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Modal, Popconfirm, Table } from "antd";
+import { Button, ConfigProvider, Modal, Popconfirm, Table } from "antd";
 import { Cpu, Loader2, Plus, Trash, View } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 
 import { z } from "zod";
+import { useAppSelector } from "../store";
 import { useGetTrainingFilesQuery } from "../store/services/trainingFiles";
 
 // Schema de validação com zod
@@ -23,6 +24,8 @@ export default function TrainingFiles() {
   const [viewAll, setViewAll] = useState(false);
 
   const { data: trainingFiles, isLoading } = useGetTrainingFilesQuery();
+
+  const theme = useAppSelector((state) => state.themeSlice.theme);
 
   const {
     register,
@@ -57,7 +60,7 @@ export default function TrainingFiles() {
       ),
       conteudo: (
         <div className="flex flex-col gap-2 max-h-72 overflow-hidden max-w-[600px]">
-          <pre className="bg-gray-100 p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col text-wrap ">
+          <pre className="bg-gray-100 dark:bg-[#161515c5] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
             <ReactMarkdown>{item.content}</ReactMarkdown>
           </pre>
         </div>
@@ -133,12 +136,12 @@ export default function TrainingFiles() {
   return (
     <div className="w-full h-full mx-auto flex flex-col overflow-hidden">
       <div className="w-full p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
-        <span className="w-full md:w-auto text-base text-gray-500 flex items-center gap-2">
+        <span className="w-full md:w-auto text-base text-gray-500 dark:text-gray-300 flex items-center gap-2">
           <Cpu size={22} /> Arquivos de Treinamento
         </span>
         <div className="w-full md:w-auto flex justify-end items-center gap-2">
           <Button
-            className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
+            className=" !text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
             onClick={() => setViewAll(!viewAll)}
             disabled={getTableData.length <= 10}
           >
@@ -146,7 +149,7 @@ export default function TrainingFiles() {
             {viewAll && getTableData.length > 10 ? "Ver menos" : "Ver todos"}
           </Button>
           <Button
-            className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
+            className=" !text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
             onClick={() => setIsModalOpen(true)}
           >
             <Plus size={16} />
@@ -155,105 +158,158 @@ export default function TrainingFiles() {
         </div>
       </div>
       <div className="w-full h-full p-4">
-        <div className="w-full bg-white rounded-lg h-full">
+        <div className="w-full bg-white dark:bg-[#101828] rounded-lg h-full dark:text-gray-200 dark:border-gray-700">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 size={24} className="animate-spin" />
             </div>
           ) : (
-            <Table
-              className="bg-transparent rounded-lg h-full"
-              bordered={false}
-              dataSource={getTableData}
-              expandable={{
-                expandedRowClassName: () => "bg-blue-500",
-              }}
-              columns={columns}
-              scroll={{
-                x: true,
-                y:
-                  !viewAll && getTableData.length < 10
-                    ? "calc(100vh - 220px)"
-                    : "calc(100vh - 260px)",
-              }}
-              pagination={
-                !viewAll && getTableData.length > 10
+            <ConfigProvider
+              theme={
+                theme
                   ? {
-                      pageSize: 10,
-                      position: ["bottomCenter"],
+                      token: {
+                        colorPrimary: "#e5e7eb",
+                        colorText: "#e5e7eb",
+                        colorBorder: "#364153",
+                        colorBgContainer: "#101828",
+                      },
+                      components: {
+                        Table: {
+                          headerBg: "#101828",
+                          headerColor: "#e5e7eb",
+                          stickyScrollBarBg: "#031842c5",
+                          stickyScrollBarBorderRadius: 4,
+                          borderColor: "#364153",
+                          headerSplitColor: "#364153",
+                        },
+                        Pagination: {
+                          colorBgContainer: "#101828a2",
+                        },
+                      },
                     }
-                  : false
+                  : undefined
               }
-            />
+            >
+              <Table
+                className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
+                bordered={false}
+                dataSource={getTableData}
+                columns={columns}
+                scroll={{
+                  x: true,
+                  y:
+                    !viewAll && getTableData.length < 10
+                      ? "calc(100vh - 220px)"
+                      : "calc(100vh - 260px)",
+                }}
+                pagination={
+                  !viewAll && getTableData.length > 10
+                    ? {
+                        pageSize: 10,
+                        position: ["bottomCenter"],
+                      }
+                    : false
+                }
+              />
+            </ConfigProvider>
           )}
         </div>
       </div>
-      <Modal open={isModalOpen} onCancel={handleCancel} footer={null}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold mb-2">
-            Adicionar Dado de Treinamento
-          </h2>
-          <div>
-            <label className="font-semibold">Tipo de Dado de Treinamento</label>
-            <div className="flex flex-col gap-1 mt-1">
-              <label>
-                <input type="radio" value="DDL" {...register("tipoDado")} />
-                <span className="ml-2 font-medium">DDL</span>
-                <span className="ml-2 text-gray-500 text-xs">
-                  Estas são as instruções CREATE TABLE que definem a estrutura
-                  do seu banco de dados.
-                </span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="Documentação"
-                  {...register("tipoDado")}
-                />
-                <span className="ml-2 font-medium">Documentação</span>
-                <span className="ml-2 text-gray-500 text-xs">
-                  Pode ser qualquer documentação baseada em texto. Mantenha os
-                  trechos pequenos e focados em um único tópico.
-                </span>
-              </label>
-              <label>
-                <input type="radio" value="SQL" {...register("tipoDado")} />
-                <span className="ml-2 font-medium">SQL</span>
-                <span className="ml-2 text-gray-500 text-xs">
-                  Pode ser qualquer instrução SQL que funcione. Quanto mais,
-                  melhor.
-                </span>
-              </label>
-            </div>
-            {errors.tipoDado && (
-              <span className="text-red-500 text-xs">
-                {errors.tipoDado.message}
-              </span>
-            )}
-          </div>
-          <div>
-            <label className="font-semibold" htmlFor="sql">
-              Seu SQL
-            </label>
-            <textarea
-              id="sql"
-              className="w-full mt-1 p-2 border rounded"
-              rows={3}
-              placeholder="Ex: SELECT coluna_1, coluna_2 FROM nome_tabela;"
-              {...register("sql")}
-            />
-            {errors.sql && (
-              <span className="text-red-500 text-xs">{errors.sql.message}</span>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white rounded py-2 font-semibold hover:bg-blue-700 transition"
+      <ConfigProvider
+        theme={
+          theme
+            ? {
+                token: {
+                  colorBgElevated: "#101828",
+                  colorIcon: "#e5e7eb",
+                },
+              }
+            : undefined
+        }
+      >
+        <Modal
+          open={isModalOpen}
+          onCancel={handleCancel}
+          footer={null}
+          rootClassName="!p-0"
+          classNames={{
+            footer: "!bg-red-500 p-0",
+          }}
+        >
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 dark:!bg-gray-900"
           >
-            Salvar
-          </button>
-        </form>
-      </Modal>
+            <h2 className="text-lg font-bold mb-2 dark:text-gray-200">
+              Adicionar Dado de Treinamento
+            </h2>
+            <div>
+              <label className="font-semibold dark:text-gray-200">
+                Tipo de Dado de Treinamento
+              </label>
+              <div className="flex flex-col gap-1 mt-1 dark:text-gray-200">
+                <label>
+                  <input type="radio" value="DDL" {...register("tipoDado")} />
+                  <span className="ml-2 font-medium">DDL</span>
+                  <span className="ml-2 text-gray-500 text-xs">
+                    Estas são as instruções CREATE TABLE que definem a estrutura
+                    do seu banco de dados.
+                  </span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="Documentação"
+                    {...register("tipoDado")}
+                  />
+                  <span className="ml-2 font-medium">Documentação</span>
+                  <span className="ml-2 text-gray-500 text-xs">
+                    Pode ser qualquer documentação baseada em texto. Mantenha os
+                    trechos pequenos e focados em um único tópico.
+                  </span>
+                </label>
+                <label>
+                  <input type="radio" value="SQL" {...register("tipoDado")} />
+                  <span className="ml-2 font-medium">SQL</span>
+                  <span className="ml-2 text-gray-500 text-xs">
+                    Pode ser qualquer instrução SQL que funcione. Quanto mais,
+                    melhor.
+                  </span>
+                </label>
+              </div>
+              {errors.tipoDado && (
+                <span className="text-red-500 text-xs">
+                  {errors.tipoDado.message}
+                </span>
+              )}
+            </div>
+            <div>
+              <label className="font-semibold dark:text-gray-200" htmlFor="sql">
+                Seu SQL
+              </label>
+              <textarea
+                id="sql"
+                className="w-full mt-1 p-2 border rounded dark:bg-gray-900 dark:text-gray-200"
+                rows={3}
+                placeholder="Ex: SELECT coluna_1, coluna_2 FROM nome_tabela;"
+                {...register("sql")}
+              />
+              {errors.sql && (
+                <span className="text-red-500 text-xs">
+                  {errors.sql.message}
+                </span>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="!bg-blue-600 text-white rounded py-2 font-semibold hover:bg-blue-700 transition dark:!bg-blue-500 dark:hover:!bg-blue-600"
+            >
+              Salvar
+            </button>
+          </form>
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 }

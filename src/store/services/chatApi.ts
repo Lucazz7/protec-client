@@ -1,6 +1,12 @@
 // const API_URL = "http://localhost:3001/api/chats";
-const API_URL = "http://localhost:8084/api/v0/";
-import { IHistoryQuestion, Message } from "../../interface/IChat";
+// const API_URL = "http://localhost:8084/api/v0/";
+const API_URL = "http://167.234.225.105:6543/";
+
+import {
+  IHistoryQuestion,
+  IResponseMessage,
+  Message,
+} from "../../interface/IChat";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Chat } from "../../interface/IChat";
@@ -22,10 +28,11 @@ export const chatApi = createApi({
       query: (id) => `load_question?id=${id}`,
       providesTags: ["Chat"],
     }),
-    createChat: builder.mutation<Message, { question: string }>({
+    createChat: builder.mutation<IResponseMessage, { question: string }>({
       query: (data) => ({
-        url: `/generate_sql?question=${data.question}`,
-        method: "GET",
+        url: `/make_question`,
+        method: "POST",
+        body: data,
       }),
       invalidatesTags: ["Chat"],
     }),

@@ -10,6 +10,7 @@ import {
   REHYDRATE,
 } from "redux-persist";
 import chatSlice from "./redux/chatSlice";
+import themeSlice from "./redux/themeSlice";
 import { chatApi } from "./services/chatApi";
 import { trainingFilesApi } from "./services/trainingFiles";
 // import { persistReducer, persistStore } from "redux-persist";
@@ -26,6 +27,7 @@ import { trainingFilesApi } from "./services/trainingFiles";
 export const store = configureStore({
   reducer: {
     chatSlice: chatSlice,
+    themeSlice: themeSlice,
     [chatApi.reducerPath]: chatApi.reducer,
     [trainingFilesApi.reducerPath]: trainingFilesApi.reducer,
   },

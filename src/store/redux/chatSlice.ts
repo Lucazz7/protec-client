@@ -19,6 +19,20 @@ const chatSlice = createSlice({
     setChatHistory: (state, action: PayloadAction<Message[]>) => {
       state.chatHistory = action.payload;
     },
+    updateMessage: (
+      state,
+      action: PayloadAction<{ position: number; is_correct: boolean }>
+    ) => {
+      const index = state.chatHistory.findIndex(
+        (_, index) => index === action.payload.position
+      );
+      if (index !== -1) {
+        state.chatHistory[index] = {
+          ...state.chatHistory[index],
+          is_correct: action.payload.is_correct,
+        };
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addMatcher(
@@ -34,7 +48,7 @@ const chatSlice = createSlice({
             ? [
                 {
                   id: action.payload?.id,
-                  type: "user",
+                  response_type: "user",
                   question: action.payload?.question,
                 },
                 {
@@ -46,14 +60,14 @@ const chatSlice = createSlice({
         }
       }
     );
-    builder.addMatcher(chatApi.endpoints.getChatById.matchRejected, (state) => {
-      state.chatHistory = [];
-      state.error =
-        "Não foi possível carregar os dados de histórico de conversas";
-    });
+    // builder.addMatcher(chatApi.endpoints.getChatById.matchRejected, (state) => {
+    //   state.chatHistory = [];
+    //   state.error =
+    //     "Não foi possível carregar os dados de histórico de conversas";
+    // });
   },
 });
 
-export const { setChatHistory } = chatSlice.actions;
+export const { setChatHistory, updateMessage } = chatSlice.actions;
 
 export default chatSlice.reducer;

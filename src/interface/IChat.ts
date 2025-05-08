@@ -1,13 +1,7 @@
 export interface Message {
   id: string;
-  type:
-    | "user"
-    | "text"
-    | "question_cache"
-    | "df"
-    | "sql"
-    | "error"
-    | "sql_error";
+  response_type: string;
+  is_correct?: boolean;
   question?: string;
   should_generate_chart?: boolean;
   text?: string;
@@ -44,4 +38,40 @@ export interface IHistoryQuestion {
 export interface IQuestion {
   id: string;
   question: string;
+}
+
+export interface IResponseMessage {
+  response_type: string;
+  response: string;
+  vanna_question: IVannaQuestion;
+  answer: IAnswer[];
+}
+
+export interface IVannaQuestion {
+  question: string;
+  vanna_collection_point: any;
+  is_relevant: boolean;
+  id: number;
+  generated_sql: string;
+}
+
+export interface IAnswer {
+  codfilial: number;
+  codreqchave: number;
+  codusucad: number;
+  datahoracad: string;
+  informacoes?: string;
+  codusulib: number;
+  datahoralib: string;
+  codaprova: string;
+  codtiporeq: number;
+  parametros: any;
+  parametros2: string;
+  obs: string;
+  datahoraalt: any;
+  datahorareplica: any;
+  justificativa: any;
+  codfilialtrans: number;
+  codtransacao: number;
+  usuliberacao: any;
 }

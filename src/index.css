@@ -3,21 +3,46 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  
+  /* Adicionando variáveis de tema */
+  --background-gradient-light: linear-gradient(to top right, #bfdbfe, #dbeafe, #fecdd3);
+  --background-gradient-dark: linear-gradient(to top right, #fc0404, #024192, #e46815);
 }
 
+
+
 @layer base {
+  /* Tema claro (padrão) */
   html, body {
     @apply w-full m-0 p-0;
     min-height: 100dvh;
-    background: linear-gradient(to top right, #bfdbfe, #dbeafe, #fecdd3);
+    background: var(--background-gradient-light);
+    background-size: 180% 180%;
+    animation: gradient-animation 4s ease infinite;
     position: relative;
     overflow: hidden;
+  }
+
+  /* Tema escuro */
+  .dark {
+    html, body {
+      @apply w-full m-0 p-0;
+      min-height: 100dvh;
+      background: var(--background-gradient-dark);
+      background-size: 180% 180%;
+      animation: gradient-animation 4s ease infinite;
+      position: relative;
+      overflow: hidden;
+    }
   }
 
   body::before,
@@ -78,3 +103,17 @@
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
