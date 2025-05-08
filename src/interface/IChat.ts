@@ -44,7 +44,7 @@ export interface IResponseMessage {
   response_type: string;
   response: string;
   vanna_question: IVannaQuestion;
-  answer: IAnswer[];
+  answer: string;
 }
 
 export interface IVannaQuestion {

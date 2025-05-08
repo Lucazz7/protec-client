@@ -36,20 +36,14 @@ export const chatApi = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
-    chatGenerateSql: builder.mutation<Message, string>({
+
+    relevantMessage: builder.mutation<Message, string>({
       query: (id) => ({
-        url: `/run_sql?id=${id}`,
-        method: "GET",
-      }),
-      invalidatesTags: ["Chat"],
-    }),
-    addMessage: builder.mutation<
-      Message,
-      { last_question: string; new_question: string }
-    >({
-      query: (message) => ({
-        url: `/generate_rewritten_question?last_question=${message.last_question}&new_question=${message.new_question}`,
-        method: "GET",
+        url: `/mark_question_as_relevant`,
+        method: "POST",
+        body: {
+          question_id: id,
+        },
       }),
       invalidatesTags: ["Chat"],
     }),
@@ -63,7 +57,6 @@ export const {
   useGetHistoryQuery,
   //   createChat
   useCreateChatMutation,
-  useChatGenerateSqlMutation,
   //   addMessage
-  useAddMessageMutation,
+  useRelevantMessageMutation,
 } = chatApi;

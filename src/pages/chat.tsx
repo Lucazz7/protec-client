@@ -10,8 +10,6 @@ import GradientText from "../components/GradientText";
 import { useAppSelect } from "../store";
 import { setChatHistory } from "../store/redux/chatSlice";
 import {
-  useAddMessageMutation,
-  useChatGenerateSqlMutation,
   useCreateChatMutation,
   useGetChatByIdQuery,
 } from "../store/services/chatApi";
@@ -27,9 +25,7 @@ export default function Chat() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const [createChat, { isLoading: isCreating }] = useCreateChatMutation();
-  const [chatGenerateSql, { isLoading: isGeneratingSql }] =
-    useChatGenerateSqlMutation();
-  const [addMessage, { isLoading: isAdding }] = useAddMessageMutation();
+
   const { isLoading: isLoadingChat, isFetching } = useGetChatByIdQuery(
     String(id),
     {
@@ -49,66 +45,6 @@ export default function Chat() {
   const handleClearMessage = () => {
     setChatMessage("");
   };
-
-  const handleAddMessage = useCallback(() => {
-    if (!id) return;
-    const currentMessage = chatMessage;
-    setChatMessage("");
-
-    // Adiciona a mensagem do usuário ao histórico
-    const updatedHistory: Message[] = [
-      ...chatHistory,
-      {
-        id: "",
-        response_type: "user",
-        question: currentMessage,
-      },
-    ];
-    dispatch(setChatHistory(updatedHistory));
-
-    // Pega a última pergunta do usuário
-    const lastUserMessage = [...chatHistory]
-      .reverse()
-      .find((msg) => msg.response_type === "user" && msg.question);
-
-    const last_question = lastUserMessage?.question || "";
-    const new_question = currentMessage;
-
-    addMessage({
-      last_question,
-      new_question,
-    }).then((res) => {
-      if (res.error) {
-        toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
-        setChatMessage(currentMessage);
-        // Remove a mensagem do usuário em caso de erro
-        dispatch(setChatHistory(chatHistory));
-        return;
-      }
-
-      createChat({ question: currentMessage }).then((res) => {
-        if (res.error) {
-          toast.error("Erro ao enviar mensagem. Por favor, tente novamente.");
-          setChatMessage(currentMessage);
-          dispatch(setChatHistory(chatHistory));
-          return;
-        }
-
-        // Adiciona a resposta da API ao histórico
-        const newHistory: Message[] = [
-          ...updatedHistory,
-          {
-            ...res.data,
-            question: res.data.response,
-            id: res.data.vanna_question.id.toString(),
-          },
-        ];
-        dispatch(setChatHistory(newHistory));
-
-        // Se for SQL, gera o SQL
-      });
-    });
-  }, [id, chatMessage, dispatch, chatHistory, addMessage, createChat]);
 
   const handleCreateChat = useCallback(() => {
     const currentMessage = chatMessage;
@@ -143,6 +79,7 @@ export default function Chat() {
         {
           id: res?.data?.vanna_question?.id?.toString() ?? "",
           response_type: res?.data?.response_type,
+          df: res?.data?.answer,
           question:
             res?.data?.response || res?.data?.vanna_question?.generated_sql,
         },
@@ -151,17 +88,11 @@ export default function Chat() {
     });
   }, [chatHistory, chatMessage, createChat, dispatch, navigate]);
 
-  console.log(chatHistory);
-
   const handleSendMessage = useCallback(() => {
-    if (!id) {
-      return handleCreateChat();
-    }
-    return handleAddMessage();
-  }, [handleAddMessage, handleCreateChat, id]);
+    return handleCreateChat();
+  }, [handleCreateChat]);
 
-  const loading =
-    isAdding || isCreating || isGeneratingSql || isFetching || isLoadingChat;
+  const loading = isCreating || isFetching || isLoadingChat;
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -172,7 +103,7 @@ export default function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [isAdding, isCreating, chatHistory]);
+  }, [isCreating, chatHistory]);
 
   useEffect(() => {
     AOS.init({
@@ -259,7 +190,7 @@ export default function Chat() {
               setMessage={setChatMessage}
               onSendMessage={handleSendMessage}
               onClearMessage={handleClearMessage}
-              isLoading={isAdding || isCreating}
+              isLoading={isCreating}
             />
           </div>
         ) : null}

@@ -1,19 +1,22 @@
-import { Button, Table } from "antd";
+import { Button, ConfigProvider, Table } from "antd";
 import Aos from "aos";
 import {
   AlertCircle,
+  Loader2,
   Plus,
   RefreshCcwDot,
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Message } from "../../interface/IChat";
+import { useAppSelector } from "../../store";
 import { setChatHistory, updateMessage } from "../../store/redux/chatSlice";
+import { useRelevantMessageMutation } from "../../store/services/chatApi";
 
 interface ChatViewProps {
   chatHistory: Message[];
@@ -28,6 +31,28 @@ export default function ChatView({
 }: ChatViewProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const { themeSelected } = useAppSelector((state) => {
+    return {
+      themeSelected: state.themeSlice.theme,
+    };
+  });
+
+  const [relevantMessage, { isLoading: isLoadingRelevant }] =
+    useRelevantMessageMutation();
+
+  const handleRelevantMessage = useCallback(
+    (id: string, index: number, isCorrect: boolean) => {
+      relevantMessage(id);
+      dispatch(
+        updateMessage({
+          position: index,
+          is_correct: isCorrect,
+        })
+      );
+    },
+    [dispatch, relevantMessage]
+  );
 
   useEffect(() => {
     Aos.init({
@@ -48,16 +73,20 @@ export default function ChatView({
                 data-aos="zoom-in"
                 data-aos-duration="400"
               >
-                {chat?.sql && (
-                  <div className="w-full flex flex-col gap-1">
-                    <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mt-2">
-                      SQL:
-                    </div>
-                    <pre className="bg-gray-100 dark:bg-[#10182852] shadow-sm p-2 rounded text-xs overflow-auto  px-5">
-                      <ReactMarkdown>{chat?.sql}</ReactMarkdown>
-                    </pre>
-                  </div>
-                )}
+                {chat?.sql ||
+                  (chat?.question &&
+                    chat.question.toLowerCase().includes("select") &&
+                    (chat.question.toLowerCase().includes("from") ||
+                      chat.question.toLowerCase().includes("where")) && (
+                      <div className="flex flex-col gap-2">
+                        <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mt-2">
+                          SQL:
+                        </div>
+                        <pre className="bg-gray-100 dark:bg-[#10182898] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
+                          <ReactMarkdown>{chat.question}</ReactMarkdown>
+                        </pre>
+                      </div>
+                    ))}
                 {chat?.df && chat?.df.length > 0 && chat?.df !== "[]" && (
                   <div className="p-2 rounded">
                     <div className="font-mono text-xs text-gray-700 mb-1">
@@ -66,6 +95,7 @@ export default function ChatView({
                     {(() => {
                       let rows;
                       try {
+                        console.log(chat?.df);
                         rows = JSON.parse(chat?.df || "");
                       } catch {
                         rows = [];
@@ -76,20 +106,41 @@ export default function ChatView({
                         typeof rows[0] === "object"
                       ) {
                         const headers = Object.keys(rows[0]);
-                        // ... existing code ...
                         const columns = headers.map((header) => ({
                           title: (
-                            <div className="font-mono text-xs text-gray-700 mt-2 line-clamp-1 max-w-[100px] text-center">
+                            <div className="font-mono text-xs text-gray-700 mt-2 line-clamp-1 max-w-[150px] text-center">
                               {header}
                             </div>
                           ),
                           dataIndex: header,
                           key: header,
-                          render: (value: any) => (
-                            <div className="line-clamp-1 max-w-[100px] h-6 w-full text-center">
-                              {value ?? "null"}
-                            </div>
-                          ),
+                          render: (value: any) => {
+                            if (
+                              value === null ||
+                              (typeof value === "number" && isNaN(value))
+                            ) {
+                              return (
+                                <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center text-gray-400">
+                                  -
+                                </div>
+                              );
+                            }
+                            if (
+                              typeof value === "string" &&
+                              value.match(/^\d{4}-\d{2}-\d{2}/)
+                            ) {
+                              return (
+                                <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center">
+                                  {new Date(value).toLocaleString()}
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center">
+                                {value?.toString() ?? "-"}
+                              </div>
+                            );
+                          },
                         }));
 
                         const dataSource = rows.map((row: any, i: number) => ({
@@ -98,24 +149,51 @@ export default function ChatView({
                         }));
                         return (
                           <div className="overflow-x-auto bg-white dark:bg-[#10182852] rounded-md">
-                            <Table
-                              columns={columns}
-                              dataSource={dataSource}
-                              pagination={
-                                dataSource.length > 10
+                            <ConfigProvider
+                              theme={
+                                themeSelected
                                   ? {
-                                      pageSize: 10,
-                                      position: ["bottomCenter"],
+                                      token: {
+                                        colorPrimary: "#e5e7eb",
+                                        colorText: "#e5e7eb",
+                                        colorBorder: "#364153",
+                                        colorBgContainer: "#101828",
+                                      },
+                                      components: {
+                                        Table: {
+                                          headerBg: "#101828",
+                                          headerColor: "#e5e7eb",
+                                          stickyScrollBarBg: "#031842c5",
+                                          stickyScrollBarBorderRadius: 4,
+                                          borderColor: "#364153",
+                                          headerSplitColor: "#364153",
+                                        },
+                                        Pagination: {
+                                          colorBgContainer: "#101828a2",
+                                        },
+                                      },
                                     }
-                                  : false
+                                  : undefined
                               }
-                              size="small"
-                              scroll={{ x: true }}
-                            />
+                            >
+                              <Table
+                                columns={columns}
+                                dataSource={dataSource}
+                                pagination={
+                                  dataSource.length > 10
+                                    ? {
+                                        pageSize: 10,
+                                        position: ["bottomCenter"],
+                                      }
+                                    : false
+                                }
+                                size="small"
+                                scroll={{ x: true }}
+                              />
+                            </ConfigProvider>
                           </div>
                         );
                       }
-                      // fallback para o formato antigo se não for possível montar tabela
                       return (
                         <pre className="bg-white dark:bg-[#10182852] p-2 rounded text-xs">
                           {rows
@@ -145,6 +223,44 @@ export default function ChatView({
                     </div>
                   </div>
                 )}
+                <div className="flex gap-2 mt-2 ">
+                  <Button
+                    type="text"
+                    size="small"
+                    className={`flex items-center gap-1  hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                      chat.is_correct === true
+                        ? "!text-blue-400"
+                        : "!text-gray-400 dark:!text-gray-300"
+                    }`}
+                    disabled={isLoadingRelevant}
+                    onClick={() => {
+                      handleRelevantMessage(chat.id, index, true);
+                    }}
+                  >
+                    {isLoadingRelevant ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <ThumbsUp size={16} className="hover:scale-110" />
+                    )}
+                    <span>Correto</span>
+                  </Button>
+                  <Button
+                    type="text"
+                    size="small"
+                    disabled={isLoadingRelevant}
+                    className={`flex items-center gap-1  hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                      chat.is_correct === false
+                        ? "!text-red-500 dark:!text-red-500"
+                        : "!text-gray-400 dark:!text-gray-300"
+                    }`}
+                    onClick={() => {
+                      handleRelevantMessage(chat.id, index, false);
+                    }}
+                  >
+                    <ThumbsDown size={16} />
+                    <span>Incorreto</span>
+                  </Button>
+                </div>
               </div>
             );
           }
@@ -159,14 +275,15 @@ export default function ChatView({
               data-aos-duration="400"
             >
               <div
-                className={`max-w-[80%]  rounded-2xl  ${
+                className={`max-w-[80%] rounded-2xl  ${
                   chat.response_type === "user"
                     ? "bg-white dark:bg-[#101828b7] text-gray-600  dark:text-gray-300 p-2 px-4 rounded-br-none"
                     : "  p-2 px-4 text-gray-500 dark:text-gray-300 rounded-bl-none "
                 }`}
               >
                 {chat.response_type === "SQL_WITH_TABLE" ||
-                (chat.question &&
+                (chat.response_type !== "user" &&
+                  chat.question &&
                   chat.question.toLowerCase().includes("select") &&
                   (chat.question.toLowerCase().includes("from") ||
                     chat.question.toLowerCase().includes("where"))) ? (
@@ -177,6 +294,44 @@ export default function ChatView({
                     <pre className="bg-gray-100 dark:bg-[#10182898] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
                       <ReactMarkdown>{chat.question}</ReactMarkdown>
                     </pre>
+                    <div className="flex gap-2 mt-2 ">
+                      <Button
+                        type="text"
+                        size="small"
+                        className={`flex items-center gap-1  hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                          chat.is_correct === true
+                            ? "!text-blue-400"
+                            : "!text-gray-400 dark:!text-gray-300"
+                        }`}
+                        disabled={isLoadingRelevant}
+                        onClick={() => {
+                          handleRelevantMessage(chat.id, index, true);
+                        }}
+                      >
+                        {isLoadingRelevant ? (
+                          <Loader2 className="animate-spin" size={16} />
+                        ) : (
+                          <ThumbsUp size={16} className="hover:scale-110" />
+                        )}
+                        <span>Correto</span>
+                      </Button>
+                      <Button
+                        type="text"
+                        size="small"
+                        className={`flex items-center gap-1  hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                          chat.is_correct === false
+                            ? "!text-red-500 dark:!text-red-500"
+                            : "!text-gray-400 dark:!text-gray-300"
+                        }`}
+                        disabled={isLoadingRelevant}
+                        onClick={() => {
+                          handleRelevantMessage(chat.id, index, false);
+                        }}
+                      >
+                        <ThumbsDown size={16} />
+                        <span>Incorreto</span>
+                      </Button>
+                    </div>
                   </div>
                 ) : chat.response_type === "error" ? (
                   <div className="w-full flex flex-col gap-2">
@@ -193,51 +348,6 @@ export default function ChatView({
                 ) : (
                   <ReactMarkdown>{chat.question}</ReactMarkdown>
                 )}
-
-                {chat.response_type !== "user" && (
-                  <div className="flex gap-2 mt-2 ">
-                    <Button
-                      type="text"
-                      size="small"
-                      className={`flex items-center gap-1  hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
-                        chat.is_correct === true
-                          ? "!text-green-500"
-                          : "!text-gray-400 dark:!text-gray-300"
-                      }`}
-                      onClick={() => {
-                        dispatch(
-                          updateMessage({
-                            position: index,
-                            is_correct: true,
-                          })
-                        );
-                      }}
-                    >
-                      <ThumbsUp size={16} className="hover:scale-110" />
-                      <span>Correto</span>
-                    </Button>
-                    <Button
-                      type="text"
-                      size="small"
-                      className={`flex items-center gap-1  hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
-                        chat.is_correct === false
-                          ? "!text-red-500 dark:!text-red-500"
-                          : "!text-gray-400 dark:!text-gray-300"
-                      }`}
-                      onClick={() => {
-                        dispatch(
-                          updateMessage({
-                            position: index,
-                            is_correct: false,
-                          })
-                        );
-                      }}
-                    >
-                      <ThumbsDown size={16} />
-                      <span>Incorreto</span>
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           );
@@ -245,11 +355,11 @@ export default function ChatView({
 
       {isLoading ? (
         <div
-          className={`flex justify-center items-center ${
+          className={` flex justify-start items-center ${
             chatHistory.length === 0 ? "w-full h-full" : ""
           }`}
         >
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-800 my-6"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 my-6"></div>
         </div>
       ) : error && chatHistory.length === 0 ? (
         <div className="w-full h-full flex flex-col justify-center items-center">

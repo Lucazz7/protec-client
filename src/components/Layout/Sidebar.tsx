@@ -100,7 +100,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           <img
             src="/image/svg/fav-icon-biofy.svg"
             alt="logo"
-            className="h-10 lg:h-14 cursor-pointer invert dark:invert-0"
+            className="object-contain h-12 lg:h-14 cursor-pointer invert dark:invert-0"
           />
         </div>
         <div className="hidden lg:flex w-full items-center">
@@ -229,7 +229,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <div className="w-full flex lg:hidden flex-col mt-auto ">
           <hr className="w-full border-gray-300" />
           <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
-            <div className="w-auto p-2 bg-gray-300  rounded-full">
+            <div className="w-auto p-2 bg-gray-400 dark:bg-gray-700 rounded-full">
               <User size={20} />
             </div>
             <span className="text-gray-700 dark:text-gray-200 font-semibold">
@@ -245,7 +245,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       <div className="w-full hidden lg:flex flex-col mt-auto">
         <hr className="w-full border-gray-300 dark:border-gray-700" />
         <div className="w-full py-4 flex items-center gap-2 justify-between px-2">
-          <div className="w-auto p-2 bg-gray-300 dark:border-gray-700 rounded-full">
+          <div className="w-auto p-2 bg-gray-400 dark:bg-gray-700 rounded-full">
             <User size={20} />
           </div>
           <span className="text-gray-700 dark:text-gray-400 font-semibold">
