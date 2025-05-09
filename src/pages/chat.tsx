@@ -26,13 +26,10 @@ export default function Chat() {
 
   const [createChat, { isLoading: isCreating }] = useCreateChatMutation();
 
-  const { isLoading: isLoadingChat, isFetching } = useGetChatByIdQuery(
-    String(id),
-    {
-      skip: !id,
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  const { isLoading: isLoadingChat } = useGetChatByIdQuery(String(id), {
+    skip: !id,
+    refetchOnMountOrArgChange: true,
+  });
 
   const [chatMessage, setChatMessage] = useState("");
   const { chatHistory, error } = useAppSelect((state) => {
@@ -70,13 +67,51 @@ export default function Chat() {
         return;
       }
 
+      const isValidSQL = (sql: string): boolean => {
+        // Remove espaços extras e quebras de linha
+        const cleanSQL = sql?.trim()?.replace(/\s+/g, " ");
+
+        // Verifica se começa com uma palavra-chave SQL
+        const sqlKeywords = [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE",
+          "CREATE",
+          "ALTER",
+          "DROP",
+        ];
+
+        const upperSQL = cleanSQL?.toUpperCase();
+
+        // Verifica se a string começa com uma palavra-chave SQL
+        const startsWithKeyword = sqlKeywords?.some((keyword) =>
+          upperSQL?.startsWith(keyword)
+        );
+
+        // Verifica se contém elementos básicos de uma query
+        const hasBasicElements =
+          upperSQL?.includes("FROM") || // Para SELECT
+          (upperSQL?.includes("INTO") && upperSQL?.includes("VALUES")) || // Para INSERT
+          (upperSQL?.includes("SET") && upperSQL?.includes("WHERE")) || // Para UPDATE
+          upperSQL?.includes("WHERE"); // Para DELETE
+
+        // Verifica se termina com ponto e vírgula (opcional)
+        const endsWithSemicolon = cleanSQL?.trim()?.endsWith(";");
+
+        return (
+          startsWithKeyword &&
+          hasBasicElements &&
+          endsWithSemicolon &&
+          sql?.includes("\n")
+        );
+      };
+
       if (res?.data?.vanna_question?.id) {
         navigate(`/chat/${res.data.vanna_question.id}`);
       }
 
-      const validateSQL =
-        res?.data?.response?.includes("\n") ||
-        res?.data?.response_type === "SQL_WITH_TABLE";
+      const validateSQL = isValidSQL(res?.data?.response);
 
       // Adiciona a resposta da API ao histórico
       const newHistory: Message[] = [
@@ -99,7 +134,7 @@ export default function Chat() {
     });
   }, [chatHistory, chatMessage, createChat, dispatch, navigate]);
 
-  const loading = isCreating || isFetching || isLoadingChat;
+  const loading = isCreating || isLoadingChat;
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -131,7 +166,7 @@ export default function Chat() {
           chatHistory.length > 0
             ? "h-[70%] min-[400px]:h-[75%] min-[400px]:min-h-[75%] md:h-[92%] md:min-[400px]:min-h-[92%]"
             : "h-full md:h-auto  md:my-auto"
-        } mx-auto flex flex-col py-4 md:py-0 md:justify-center gap-2 md:gap-7 md:px-2`}
+        } mx-auto flex flex-col py-4 md:justify-center gap-2  md:px-2`}
       >
         {/* Header */}
         <div

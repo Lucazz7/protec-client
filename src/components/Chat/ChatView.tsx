@@ -3,6 +3,7 @@ import { Button, ConfigProvider, Table } from "antd";
 import Aos from "aos";
 import {
   AlertCircle,
+  CheckCircle,
   Loader2,
   Plus,
   RefreshCcwDot,
@@ -130,7 +131,7 @@ export default function ChatView({
                         </pre>
                       </div>
                     ) : (
-                      <pre className="bg-gray-100 dark:bg-[#10182898] text-gray-700 dark:text-gray-300  p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col">
+                      <pre className="md:max-w-3xl bg-gray-100 dark:bg-[#10182898] text-gray-700 dark:text-gray-300  p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col">
                         <ReactMarkdown>{chat.sql}</ReactMarkdown>
                       </pre>
                     )}
@@ -196,7 +197,7 @@ export default function ChatView({
                           ...row,
                         }));
                         return (
-                          <div className="overflow-x-auto bg-white dark:bg-[#10182852] rounded-md">
+                          <div className="overflow-x-auto bg-white dark:bg-[#10182852] rounded-md ">
                             <ConfigProvider
                               theme={
                                 themeSelected
@@ -238,7 +239,6 @@ export default function ChatView({
                                     : false
                                 }
                                 size="small"
-                                scroll={{ x: true }}
                               />
                             </ConfigProvider>
                           </div>
@@ -429,14 +429,21 @@ export default function ChatView({
 
       {chatHistory[chatHistory.length - 1]?.response_type ===
         "SQL_WITH_TABLE" && (
-        <div className="mt-4 flex justify-center">
-          <Button
-            className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
-            onClick={handleReset}
-          >
-            <Plus size={16} />
-            Nova conversa
-          </Button>
+        <div className="w-full max-w-3xl flex justify-center">
+          <div className="w-fit text-gray-500 dark:text-gray-300 text-sm bg-green-50 border-green-300 dark:border-transparent border-1 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light ">
+            <CheckCircle className="text-green-500" />
+            <span className="flex items-center gap-2">
+              SQL gerado com sucesso! Para gerar outro,{" "}
+              <p
+                className="text-green-500 cursor-pointer underline"
+                onClick={() => {
+                  handleReset();
+                }}
+              >
+                clique aqui
+              </p>
+            </span>
+          </div>
         </div>
       )}
     </div>
