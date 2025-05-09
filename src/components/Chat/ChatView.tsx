@@ -206,14 +206,13 @@ export default function ChatView({
                                         colorPrimary: "#e5e7eb",
                                         colorText: "#e5e7eb",
                                         colorBorder: "#364153",
-                                        colorBgContainer: "#101828",
+                                        colorBgContainer: "#1c2130",
                                       },
                                       components: {
                                         Table: {
                                           headerBg: "#101828",
                                           headerColor: "#e5e7eb",
                                           stickyScrollBarBg: "#010308c5",
-                                          stickyScrollBarBorderRadius: 4,
                                           borderColor: "#364153",
                                           headerSplitColor: "#364153",
                                         },
@@ -226,7 +225,7 @@ export default function ChatView({
                               }
                             >
                               <Table
-                                className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
+                                className="!bg-transparent rounded-lg h-full dark:!bg-transparent "
                                 columns={columns}
                                 bordered={false}
                                 dataSource={dataSource}
@@ -238,7 +237,7 @@ export default function ChatView({
                                       }
                                     : false
                                 }
-                                size="small"
+                                size="middle"
                               />
                             </ConfigProvider>
                           </div>
