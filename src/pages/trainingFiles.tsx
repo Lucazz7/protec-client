@@ -290,7 +290,7 @@ export default function TrainingFiles() {
               </label>
               <textarea
                 id="sql"
-                className="w-full mt-1 p-2 border rounded dark:bg-gray-900 dark:text-gray-200"
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-700 rounded dark:bg-gray-900 dark:text-gray-200"
                 rows={3}
                 placeholder="Ex: SELECT coluna_1, coluna_2 FROM nome_tabela;"
                 {...register("sql")}
