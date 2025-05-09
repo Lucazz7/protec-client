@@ -1,6 +1,6 @@
 // const API_URL = "http://localhost:3001/api/chats";
 // const API_URL = "http://localhost:8084/api/v0/";
-const API_URL = "http://167.234.225.105:6543/";
+const API_URL = "http://167.234.225.1asdas05:6543/";
 
 import {
   IHistoryQuestion,

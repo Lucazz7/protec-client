@@ -32,6 +32,7 @@ export default function Chat() {
   });
 
   const [chatMessage, setChatMessage] = useState("");
+  const [hasError, setHasError] = useState(false);
   const { chatHistory, error } = useAppSelect((state) => {
     return {
       chatHistory: state.chatSlice.chatHistory,
@@ -41,11 +42,13 @@ export default function Chat() {
 
   const handleClearMessage = () => {
     setChatMessage("");
+    setHasError(false);
   };
 
   const handleCreateChat = useCallback(() => {
     const currentMessage = chatMessage;
     setChatMessage("");
+    setHasError(false);
 
     const updatedHistory: Message[] = [
       ...chatHistory,
@@ -62,6 +65,7 @@ export default function Chat() {
       if (res.error) {
         toast.error("Erro ao enviar mensagem!");
         setChatMessage(currentMessage);
+        setHasError(true);
         dispatch(setChatHistory(chatHistory));
         return;
       }
@@ -219,6 +223,7 @@ export default function Chat() {
               onSendMessage={handleCreateChat}
               onClearMessage={handleClearMessage}
               isLoading={loading}
+              hasError={hasError}
             />
           </div>
         ) : null}

@@ -8,6 +8,7 @@ import { useRef } from "react";
 interface ChatInputProps {
   message: string;
   isLoading: boolean;
+  hasError: boolean;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   onSendMessage: () => void;
   onClearMessage: () => void;
@@ -16,6 +17,7 @@ interface ChatInputProps {
 export default function ChatInput({
   message,
   isLoading,
+  hasError,
   setMessage,
   onSendMessage,
   onClearMessage,
@@ -38,6 +40,8 @@ export default function ChatInput({
       <div
         className={`w-full border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm bg-white dark:bg-[#10182898] overflow-hidden ${
           isLoading ? "opacity-60" : ""
+        } ${
+          hasError ? "border-red-500 dark:border-red-600" : "border-gray-200"
         }`}
       >
         <div className="p-3">
@@ -55,7 +59,11 @@ export default function ChatInput({
           />
         </div>
 
-        <div className=" border-gray-200 p-2 flex items-center justify-between">
+        <div
+          className={` p-2 flex items-center justify-between ${
+            hasError ? "border-red-500" : "border-gray-200"
+          }`}
+        >
           <div className="flex items-center gap-2">
             <input type="file" className="hidden" ref={fileInputRef} />
             <Button
