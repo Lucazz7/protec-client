@@ -1,8 +1,10 @@
 import { Button } from "antd";
 import { Cpu, List, RefreshCcwDot, Settings } from "lucide-react";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setChatHistory } from "../../store/redux/chatSlice";
+import { chatApi } from "../../store/services/chatApi";
 
 export default function HeaderChatView({
   setMessage,
@@ -11,6 +13,14 @@ export default function HeaderChatView({
 }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const handleReset = useCallback(() => {
+    dispatch(chatApi.util.resetApiState());
+    navigate("/");
+    dispatch(setChatHistory([]));
+    setMessage("");
+  }, [dispatch, navigate, setMessage]);
+
   return (
     <>
       <span className="text-base text-gray-500 dark:text-gray-300 flex items-center gap-2">
@@ -19,11 +29,7 @@ export default function HeaderChatView({
       <div className="flex items-center gap-2">
         <Button
           className=" !text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
-          onClick={() => {
-            navigate("/");
-            setMessage("");
-            dispatch(setChatHistory([]));
-          }}
+          onClick={handleReset}
         >
           <RefreshCcwDot size={16} />
           Reiniciar

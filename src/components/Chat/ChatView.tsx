@@ -9,15 +9,19 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import TextareaAutosize from "react-textarea-autosize";
 import { Message } from "../../interface/IChat";
 import { useAppSelector } from "../../store";
 import { setChatHistory, updateMessage } from "../../store/redux/chatSlice";
-import { useRelevantMessageMutation } from "../../store/services/chatApi";
+import {
+  chatApi,
+  useRelevantMessageMutation,
+} from "../../store/services/chatApi";
 
 interface ChatViewProps {
   chatHistory: Message[];
@@ -42,6 +46,10 @@ export default function ChatView({
   const [relevantMessage, { isLoading: isLoadingRelevant }] =
     useRelevantMessageMutation();
 
+  const [editingSQL, setEditingSQL] = useState<number | null>(null);
+  const [editedSQL, setEditedSQL] = useState("");
+  const [showEditPrompt, setShowEditPrompt] = useState<number | null>(null);
+
   const handleRelevantMessage = useCallback(
     (id: string, index: number, isCorrect: boolean) => {
       relevantMessage(id);
@@ -55,6 +63,12 @@ export default function ChatView({
     [dispatch, relevantMessage]
   );
 
+  const handleSaveSQL = (index: number) => {
+    // Aqui você pode implementar a lógica para salvar o SQL editado
+    // Por exemplo, fazer uma chamada à API para atualizar o SQL
+    setEditingSQL(null);
+  };
+
   useEffect(() => {
     Aos.init({
       duration: 1000,
@@ -62,11 +76,17 @@ export default function ChatView({
     });
   }, []);
 
+  const handleReset = useCallback(() => {
+    dispatch(chatApi.util.resetApiState());
+    navigate("/");
+    dispatch(setChatHistory([]));
+  }, [dispatch, navigate]);
+
   return (
     <div className="mx-auto h-full w-full md:max-w-3xl pb-6 space-y-6 font-inter text-sm px-4 xl:px-0">
       {chatHistory.length > 0 &&
         chatHistory?.map((chat, index) => {
-          if (chat.sql || chat.df || chat.response_type === "SQL_WITH_TABLE") {
+          if (chat.sql || chat.df) {
             return (
               <div
                 key={index}
@@ -74,29 +94,56 @@ export default function ChatView({
                 data-aos="zoom-in"
                 data-aos-duration="400"
               >
-                {chat?.sql ||
-                  (chat?.question &&
-                    chat.question.toLowerCase().includes("select") &&
-                    (chat.question.toLowerCase().includes("from") ||
-                      chat.question.toLowerCase().includes("where")) && (
-                      <div className="flex flex-col gap-2">
-                        <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mt-2">
-                          SQL:
+                {chat?.sql && (
+                  <div className="max-w-[80%] flex flex-col gap-2">
+                    <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mt-2 flex justify-between items-center">
+                      <span>SQL:</span>
+                      {editingSQL === index && (
+                        <div className="flex gap-2">
+                          <Button
+                            type="text"
+                            size="small"
+                            className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-md dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+                            onClick={() => handleSaveSQL(index)}
+                          >
+                            Salvar
+                          </Button>
+                          <Button
+                            type="text"
+                            size="small"
+                            className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-md dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+                            onClick={() => setEditingSQL(null)}
+                          >
+                            Cancelar
+                          </Button>
                         </div>
-                        <pre className="bg-gray-100 dark:bg-[#10182898] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
-                          <ReactMarkdown>{chat.question}</ReactMarkdown>
+                      )}
+                    </div>
+                    {editingSQL === index ? (
+                      <div className="w-full flex flex-col gap-2">
+                        <pre className="bg-gray-100 dark:bg-[#10182898]  shadow-sm rounded text-xs overflow-x-auto ">
+                          <TextareaAutosize
+                            className="w-full p-2 px-5 text-gray-700 dark:text-gray-300 "
+                            value={editedSQL}
+                            onChange={(e) => setEditedSQL(e.target.value)}
+                          />
                         </pre>
                       </div>
-                    ))}
+                    ) : (
+                      <pre className="bg-gray-100 dark:bg-[#10182898] text-gray-700 dark:text-gray-300  p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col">
+                        <ReactMarkdown>{chat.sql}</ReactMarkdown>
+                      </pre>
+                    )}
+                  </div>
+                )}
                 {chat?.df && chat?.df.length > 0 && chat?.df !== "[]" && (
                   <div className="p-2 rounded">
-                    <div className="font-mono text-xs text-gray-700 mb-1">
+                    <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mb-1">
                       Resultado SQL:
                     </div>
                     {(() => {
                       let rows;
                       try {
-                        console.log(chat?.df);
                         rows = JSON.parse(chat?.df || "");
                       } catch {
                         rows = [];
@@ -109,7 +156,7 @@ export default function ChatView({
                         const headers = Object.keys(rows[0]);
                         const columns = headers.map((header) => ({
                           title: (
-                            <div className="font-mono text-xs text-gray-700 mt-2 line-clamp-1 max-w-[150px] text-center">
+                            <div className="font-mono text-xs mt-2 line-clamp-1 max-w-[150px] text-center">
                               {header}
                             </div>
                           ),
@@ -164,7 +211,7 @@ export default function ChatView({
                                         Table: {
                                           headerBg: "#101828",
                                           headerColor: "#e5e7eb",
-                                          stickyScrollBarBg: "#031842c5",
+                                          stickyScrollBarBg: "#010308c5",
                                           stickyScrollBarBorderRadius: 4,
                                           borderColor: "#364153",
                                           headerSplitColor: "#364153",
@@ -178,7 +225,9 @@ export default function ChatView({
                               }
                             >
                               <Table
+                                className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
                                 columns={columns}
+                                bordered={false}
                                 dataSource={dataSource}
                                 pagination={
                                   dataSource.length > 10
@@ -224,11 +273,11 @@ export default function ChatView({
                     </div>
                   </div>
                 )}
-                <div className="flex gap-2 mt-2 ">
+                <div className="flex gap-2 mt-2">
                   <Button
                     type="text"
                     size="small"
-                    className={`flex items-center gap-1  hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                    className={`flex items-center gap-1 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
                       chat.is_correct === true
                         ? "!text-blue-400"
                         : "!text-gray-400 dark:!text-gray-300"
@@ -249,19 +298,40 @@ export default function ChatView({
                     type="text"
                     size="small"
                     disabled={isLoadingRelevant}
-                    className={`flex items-center gap-1  hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                    className={`flex items-center gap-1 hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
                       chat.is_correct === false
                         ? "!text-red-500 dark:!text-red-500"
                         : "!text-gray-400 dark:!text-gray-300"
                     }`}
                     onClick={() => {
                       handleRelevantMessage(chat.id, index, false);
+                      setShowEditPrompt(index);
                     }}
                   >
                     <ThumbsDown size={16} />
                     <span>Incorreto</span>
                   </Button>
                 </div>
+                {chat.is_correct === false &&
+                  showEditPrompt === index &&
+                  !editingSQL && (
+                    <div className="w-fit max-w-[80%] text-gray-500 dark:text-gray-300 text-sm bg-yellow-50 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light">
+                      <AlertCircle className="text-yellow-500" />
+                      <span className="flex items-center gap-2">
+                        Para editar o SQL gerado,{" "}
+                        <p
+                          className="text-yellow-500 cursor-pointer underline"
+                          onClick={() => {
+                            setEditingSQL(index);
+                            setEditedSQL(chat.sql || "");
+                            setShowEditPrompt(null);
+                          }}
+                        >
+                          clique aqui
+                        </p>
+                      </span>
+                    </div>
+                  )}
               </div>
             );
           }
@@ -303,7 +373,7 @@ export default function ChatView({
         })}
 
       {isLoading ? (
-        <div className="m-auto my-10 w-32 h-32 bg-white dark:bg-[#02040a] rounded-full flex justify-center items-center  relative before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-blue-500/40 before:to-purple-500/40 before:blur-xl before:-z-10">
+        <div className="m-auto  my-10 w-32 h-32 bg-white dark:bg-[#02040a] rounded-full flex justify-center items-center relative before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-blue-500/30 before:to-purple-500/30 before:blur-xl before:-z-10 ">
           <Player
             src={
               themeSelected
@@ -312,7 +382,7 @@ export default function ChatView({
             }
             loop
             autoplay
-            className="w-36 h-36"
+            className="w-36 h-36 loading-pulse"
           />
         </div>
       ) : error && chatHistory.length === 0 ? (
@@ -339,13 +409,10 @@ export default function ChatView({
               Recarregar
             </Button>
             <Button
-              className=" !text-gray-500 w-auto !rounded-full hover:!border-gray-500"
-              onClick={() => {
-                navigate("/");
-                dispatch(setChatHistory([]));
-              }}
+              className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+              onClick={handleReset}
             >
-              <Plus className="text-gray-500" size={16} />
+              <Plus size={16} />
               Nova conversa
             </Button>
           </div>
@@ -359,6 +426,19 @@ export default function ChatView({
           </div>
         </div>
       ) : null}
+
+      {chatHistory[chatHistory.length - 1]?.response_type ===
+        "SQL_WITH_TABLE" && (
+        <div className="mt-4 flex justify-center">
+          <Button
+            className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+            onClick={handleReset}
+          >
+            <Plus size={16} />
+            Nova conversa
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

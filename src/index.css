@@ -128,3 +128,19 @@
 }
 
 
+
+
+.loading-pulse {
+  animation: pulsar 10s infinite ease-in-out;
+}
+
+
+@keyframes pulsar {
+  0%, 100% {
+    transform: scale(0.7);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+

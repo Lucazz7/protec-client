@@ -12,7 +12,7 @@ import {
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { setChatHistory } from "../../store/redux/chatSlice";
-import { useGetHistoryQuery } from "../../store/services/chatApi";
+import { chatApi, useGetHistoryQuery } from "../../store/services/chatApi";
 const listMenu = [
   {
     name: "Nova conversa",
@@ -27,7 +27,7 @@ const listMenu = [
 ];
 
 import AOS from "aos";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { setTheme } from "../../store/redux/themeSlice";
 
 interface SidebarProps {
@@ -77,9 +77,15 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     dispatch(setTheme(!isDarkMode));
   };
 
+  const handleReset = useCallback(() => {
+    dispatch(chatApi.util.resetApiState());
+    navigate("/");
+    dispatch(setChatHistory([]));
+  }, [dispatch, navigate]);
+
   return (
     <div
-      className={`lg:w-80 bg-[#ffffff75] dark:bg-[#131324b4] lg:h-full rounded-2xl flex flex-col items-center transition-all duration-300 p-3 z-50 ${
+      className={`lg:w-96 bg-[#ffffff75] dark:bg-[#131324b4] lg:h-full rounded-2xl flex flex-col items-center transition-all duration-300 p-3 z-50 ${
         isOpen
           ? "w-[calc(100%-1rem)] h-[calc(100%-1rem)] bg-white dark:bg-gray-900 absolute"
           : "h-[80px]"
@@ -119,9 +125,19 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             AI Chatbot
           </span>
         </div>
-        <span className="hidden lg:flex text-sm text-gray-500 dark:text-gray-200 absolute right-0 top-0">
+        <span className="hidden lg:flex text-sm text-gray-500 dark:text-gray-200 absolute right-0 bottom-0">
           v1.0.0
         </span>{" "}
+        <button
+          onClick={toggleTheme}
+          className="absolute right-0 top-0 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        >
+          {isDarkMode ? (
+            <Sun size={18} className="text-yellow-500" />
+          ) : (
+            <Moon size={18} className="text-gray-700" />
+          )}
+        </button>
         <div
           className="flex lg:hidden items-center cursor-pointer me-auto text-gray-500 dark:text-gray-200"
           onClick={() => setIsOpen(!isOpen)}
@@ -141,10 +157,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               item.name === "Nova conversa" ? (
                 <div
                   key={index}
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsOpen(false);
-                  }}
+                  onClick={handleReset}
                   data-aos="zoom-in"
                   data-aos-duration="400"
                   className={`mx-auto w-full flex justify-center items-center gap-3 font-semibold text-gray-200 bg-gray-500  dark:hover:bg-gray-600 dark:text-gray-200 hover:text-white hover:bg-gray-700 p-2 cursor-pointer rounded-lg transition-all duration-300`}
@@ -186,16 +199,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 <History size={20} />
                 Conversas Recentes
               </span>
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                {isDarkMode ? (
-                  <Sun size={18} className="text-yellow-500" />
-                ) : (
-                  <Moon size={18} className="text-gray-700" />
-                )}
-              </button>
             </div>
             <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2 gap-1">
               {isLoadingHistory || isFetchingHistory ? (

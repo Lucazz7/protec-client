@@ -69,28 +69,35 @@ export default function Chat() {
         dispatch(setChatHistory(chatHistory));
         return;
       }
+
       if (res?.data?.vanna_question?.id) {
-        // Navega para o novo chat
         navigate(`/chat/${res.data.vanna_question.id}`);
       }
+
+      const validateSQL =
+        res?.data?.response?.includes("\n") ||
+        res?.data?.response_type === "SQL_WITH_TABLE";
+
       // Adiciona a resposta da API ao histórico
       const newHistory: Message[] = [
         ...updatedHistory,
         {
           id: res?.data?.vanna_question?.id?.toString() ?? "",
-          response_type: res?.data?.response_type,
+          response_type: validateSQL
+            ? "SQL_WITH_TABLE"
+            : res?.data?.response_type,
           df: res?.data?.answer,
-          question:
-            res?.data?.response || res?.data?.vanna_question?.generated_sql,
+
+          question: validateSQL ? "" : res?.data?.response,
+          sql:
+            res?.data?.response_type === "SQL_WITH_TABLE" || validateSQL
+              ? res?.data?.vanna_question?.generated_sql ?? res?.data?.response
+              : res?.data?.vanna_question?.generated_sql,
         },
       ];
       dispatch(setChatHistory(newHistory));
     });
   }, [chatHistory, chatMessage, createChat, dispatch, navigate]);
-
-  const handleSendMessage = useCallback(() => {
-    return handleCreateChat();
-  }, [handleCreateChat]);
 
   const loading = isCreating || isFetching || isLoadingChat;
 
@@ -173,9 +180,8 @@ export default function Chat() {
           </div>
         )}
         {/* Input do chat */}
-        {(!isLoadingChat && !isFetching && !error) ||
-        !id ||
-        chatHistory.length > 0 ? (
+        {chatHistory[chatHistory.length - 1]?.response_type !==
+        "SQL_WITH_TABLE" ? (
           <div
             className={`w-full max-w-3xl mx-auto mb-4 px-2 mt-auto`}
             data-aos="zoom-in"
@@ -184,9 +190,9 @@ export default function Chat() {
             <ChatInput
               message={chatMessage}
               setMessage={setChatMessage}
-              onSendMessage={handleSendMessage}
+              onSendMessage={handleCreateChat}
               onClearMessage={handleClearMessage}
-              isLoading={isCreating}
+              isLoading={loading}
             />
           </div>
         ) : null}
