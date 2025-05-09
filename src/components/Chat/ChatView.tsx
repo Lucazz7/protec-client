@@ -4,6 +4,7 @@ import Aos from "aos";
 import {
   AlertCircle,
   CheckCircle,
+  Download,
   Loader2,
   Plus,
   RefreshCcwDot,
@@ -83,6 +84,25 @@ export default function ChatView({
     dispatch(setChatHistory([]));
   }, [dispatch, navigate]);
 
+  const exportToCSV = (data: any[], headers: string[]) => {
+    const csvContent = [
+      headers.join(","),
+      ...data.map((row) =>
+        headers.map((header) => JSON.stringify(row[header] ?? "")).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "dados_exportados.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="mx-auto h-full w-full md:max-w-3xl pb-6 space-y-6 font-inter text-sm px-4 xl:px-0">
       {chatHistory.length > 0 &&
@@ -131,131 +151,212 @@ export default function ChatView({
                         </pre>
                       </div>
                     ) : (
-                      <pre className="md:max-w-3xl bg-gray-100 dark:bg-[#10182898] text-gray-700 dark:text-gray-300  p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col">
+                      <pre className="md:max-w-[80%] bg-gray-100 dark:bg-[#10182898] text-gray-700 dark:text-gray-300  p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
                         <ReactMarkdown>{chat.sql}</ReactMarkdown>
                       </pre>
                     )}
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        type="text"
+                        size="small"
+                        className={`flex items-center gap-1 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                          chat.is_correct === true
+                            ? "!text-blue-400"
+                            : "!text-gray-400 dark:!text-gray-300"
+                        }`}
+                        disabled={isLoadingRelevant}
+                        onClick={() => {
+                          handleRelevantMessage(chat.id, index, true);
+                        }}
+                      >
+                        {isLoadingRelevant ? (
+                          <Loader2 className="animate-spin" size={16} />
+                        ) : (
+                          <ThumbsUp size={16} className="hover:scale-110" />
+                        )}
+                        <span>Correto</span>
+                      </Button>
+                      <Button
+                        type="text"
+                        size="small"
+                        disabled={isLoadingRelevant}
+                        className={`flex items-center gap-1 hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
+                          chat.is_correct === false
+                            ? "!text-red-500 dark:!text-red-500"
+                            : "!text-gray-400 dark:!text-gray-300"
+                        }`}
+                        onClick={() => {
+                          handleRelevantMessage(chat.id, index, false);
+                          setShowEditPrompt(index);
+                        }}
+                      >
+                        <ThumbsDown size={16} />
+                        <span>Incorreto</span>
+                      </Button>
+                    </div>
+                    {chat.is_correct === false &&
+                      showEditPrompt === index &&
+                      !editingSQL && (
+                        <div className="w-fit max-w-[80%] my-2 text-gray-500 dark:text-gray-300 text-sm bg-yellow-50 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light">
+                          <AlertCircle className="text-yellow-500" />
+                          <span className="flex items-center gap-2">
+                            Para editar o SQL gerado,{" "}
+                            <p
+                              className="text-yellow-500 cursor-pointer underline"
+                              onClick={() => {
+                                setEditingSQL(index);
+                                setEditedSQL(chat.sql || "");
+                                setShowEditPrompt(null);
+                              }}
+                            >
+                              clique aqui
+                            </p>
+                          </span>
+                        </div>
+                      )}
                   </div>
                 )}
                 {chat?.df && chat?.df.length > 0 && chat?.df !== "[]" && (
-                  <div className="p-2 rounded">
-                    <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mb-1">
-                      Resultado SQL:
-                    </div>
-                    {(() => {
-                      let rows;
-                      try {
-                        rows = JSON.parse(chat?.df || "");
-                      } catch {
-                        rows = [];
-                      }
-                      if (
-                        Array.isArray(rows) &&
-                        rows.length > 0 &&
-                        typeof rows[0] === "object"
-                      ) {
-                        const headers = Object.keys(rows[0]);
-                        const columns = headers.map((header) => ({
-                          title: (
-                            <div className="font-mono text-xs mt-2 line-clamp-1 max-w-[150px] text-center">
-                              {header}
-                            </div>
-                          ),
-                          dataIndex: header,
-                          key: header,
-                          render: (value: any) => {
-                            if (
-                              value === null ||
-                              (typeof value === "number" && isNaN(value))
-                            ) {
-                              return (
-                                <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center text-gray-400">
-                                  -
-                                </div>
-                              );
-                            }
-                            if (
-                              typeof value === "string" &&
-                              value.match(/^\d{4}-\d{2}-\d{2}/)
-                            ) {
+                  <>
+                    <div className="p-2 rounded">
+                      <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mb-2">
+                        Resultado SQL:
+                      </div>
+                      {(() => {
+                        let rows;
+                        try {
+                          rows = JSON.parse(chat?.df || "");
+                        } catch {
+                          rows = [];
+                        }
+                        if (
+                          Array.isArray(rows) &&
+                          rows.length > 0 &&
+                          typeof rows[0] === "object"
+                        ) {
+                          const headers = Object.keys(rows[0]);
+                          const columns = headers.map((header) => ({
+                            title: (
+                              <div className="font-mono text-xs mt-2 line-clamp-1 max-w-[150px] text-center">
+                                {header}
+                              </div>
+                            ),
+                            dataIndex: header,
+                            key: header,
+                            render: (value: any) => {
+                              if (
+                                value === null ||
+                                (typeof value === "number" && isNaN(value))
+                              ) {
+                                return (
+                                  <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center text-gray-400">
+                                    -
+                                  </div>
+                                );
+                              }
+                              if (
+                                typeof value === "string" &&
+                                value.match(/^\d{4}-\d{2}-\d{2}/)
+                              ) {
+                                return (
+                                  <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center">
+                                    {new Date(value).toLocaleString()}
+                                  </div>
+                                );
+                              }
                               return (
                                 <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center">
-                                  {new Date(value).toLocaleString()}
+                                  {value?.toString() ?? "-"}
                                 </div>
                               );
-                            }
-                            return (
-                              <div className="line-clamp-1 max-w-[150px] h-6 w-full text-center">
-                                {value?.toString() ?? "-"}
-                              </div>
-                            );
-                          },
-                        }));
+                            },
+                          }));
 
-                        const dataSource = rows.map((row: any, i: number) => ({
-                          key: i,
-                          ...row,
-                        }));
-                        return (
-                          <div className="overflow-x-auto bg-white dark:bg-[#10182852] rounded-md ">
-                            <ConfigProvider
-                              theme={
-                                themeSelected
-                                  ? {
-                                      token: {
-                                        colorPrimary: "#e5e7eb",
-                                        colorText: "#e5e7eb",
-                                        colorBorder: "#364153",
-                                        colorBgContainer: "#1c2130",
-                                      },
-                                      components: {
-                                        Table: {
-                                          headerBg: "#101828",
-                                          headerColor: "#e5e7eb",
-                                          stickyScrollBarBg: "#010308c5",
-                                          borderColor: "#364153",
-                                          headerSplitColor: "#364153",
-                                        },
-                                        Pagination: {
-                                          colorBgContainer: "#101828a2",
-                                        },
-                                      },
+                          const dataSource = rows.map(
+                            (row: any, i: number) => ({
+                              key: i,
+                              ...row,
+                            })
+                          );
+
+                          return (
+                            <div className="flex flex-col gap-2">
+                              <div className="overflow-x-auto bg-white dark:bg-[#10182852] rounded-md ">
+                                <ConfigProvider
+                                  theme={
+                                    themeSelected
+                                      ? {
+                                          token: {
+                                            colorPrimary: "#e5e7eb",
+                                            colorText: "#e5e7eb",
+                                            colorBorder: "#364153",
+                                            colorBgContainer: "#1c2130",
+                                            borderRadius: 30,
+                                          },
+                                          components: {
+                                            Table: {
+                                              headerBg: "#101828",
+                                              headerColor: "#e5e7eb",
+                                              stickyScrollBarBg: "#010308c5",
+                                              borderColor: "#364153",
+                                              headerSplitColor: "#364153",
+                                              borderRadius: 30,
+                                            },
+                                            Pagination: {
+                                              colorBgContainer: "#101828a2",
+                                            },
+                                          },
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  <Table
+                                    className="!bg-transparent rounded-lg h-full dark:!bg-transparent "
+                                    columns={columns}
+                                    bordered={false}
+                                    dataSource={dataSource}
+                                    pagination={
+                                      dataSource.length > 10
+                                        ? {
+                                            pageSize: 10,
+                                            position: ["bottomCenter"],
+                                          }
+                                        : false
                                     }
-                                  : undefined
-                              }
-                            >
-                              <Table
-                                className="!bg-transparent rounded-lg h-full dark:!bg-transparent "
-                                columns={columns}
-                                bordered={false}
-                                dataSource={dataSource}
-                                pagination={
-                                  dataSource.length > 10
-                                    ? {
-                                        pageSize: 10,
-                                        position: ["bottomCenter"],
-                                      }
-                                    : false
-                                }
-                                size="middle"
-                              />
-                            </ConfigProvider>
-                          </div>
+                                    size="middle"
+                                  />
+                                </ConfigProvider>
+                              </div>
+                              <div className="flex justify-end ">
+                                <Button
+                                  type="text"
+                                  size="small"
+                                  className="flex items-center gap-1 !text-gray-500 dark:!text-gray-200 hover:!bg-gray-100 dark:hover:!bg-gray-800"
+                                  onClick={() =>
+                                    exportToCSV(dataSource, headers)
+                                  }
+                                >
+                                  <Download size={16} />
+                                  Exportar CSV
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return (
+                          <pre className="bg-white dark:bg-[#10182852] p-2 rounded text-xs">
+                            {rows
+                              .map((row: any) =>
+                                Object.entries(row)
+                                  .map(([k, v]) => `${k}: ${v}`)
+                                  .join(" | ")
+                              )
+                              .join("\n")}
+                          </pre>
                         );
-                      }
-                      return (
-                        <pre className="bg-white dark:bg-[#10182852] p-2 rounded text-xs">
-                          {rows
-                            .map((row: any) =>
-                              Object.entries(row)
-                                .map(([k, v]) => `${k}: ${v}`)
-                                .join(" | ")
-                            )
-                            .join("\n")}
-                        </pre>
-                      );
-                    })()}
-                  </div>
+                      })()}
+                    </div>
+                  </>
                 )}
                 {chat.fig && (
                   <div className="w-full flex justify-center h-96">
@@ -272,65 +373,6 @@ export default function ChatView({
                     </div>
                   </div>
                 )}
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    type="text"
-                    size="small"
-                    className={`flex items-center gap-1 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
-                      chat.is_correct === true
-                        ? "!text-blue-400"
-                        : "!text-gray-400 dark:!text-gray-300"
-                    }`}
-                    disabled={isLoadingRelevant}
-                    onClick={() => {
-                      handleRelevantMessage(chat.id, index, true);
-                    }}
-                  >
-                    {isLoadingRelevant ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <ThumbsUp size={16} className="hover:scale-110" />
-                    )}
-                    <span>Correto</span>
-                  </Button>
-                  <Button
-                    type="text"
-                    size="small"
-                    disabled={isLoadingRelevant}
-                    className={`flex items-center gap-1 hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
-                      chat.is_correct === false
-                        ? "!text-red-500 dark:!text-red-500"
-                        : "!text-gray-400 dark:!text-gray-300"
-                    }`}
-                    onClick={() => {
-                      handleRelevantMessage(chat.id, index, false);
-                      setShowEditPrompt(index);
-                    }}
-                  >
-                    <ThumbsDown size={16} />
-                    <span>Incorreto</span>
-                  </Button>
-                </div>
-                {chat.is_correct === false &&
-                  showEditPrompt === index &&
-                  !editingSQL && (
-                    <div className="w-fit max-w-[80%] text-gray-500 dark:text-gray-300 text-sm bg-yellow-50 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light">
-                      <AlertCircle className="text-yellow-500" />
-                      <span className="flex items-center gap-2">
-                        Para editar o SQL gerado,{" "}
-                        <p
-                          className="text-yellow-500 cursor-pointer underline"
-                          onClick={() => {
-                            setEditingSQL(index);
-                            setEditedSQL(chat.sql || "");
-                            setShowEditPrompt(null);
-                          }}
-                        >
-                          clique aqui
-                        </p>
-                      </span>
-                    </div>
-                  )}
               </div>
             );
           }
@@ -372,17 +414,26 @@ export default function ChatView({
         })}
 
       {isLoading ? (
-        <div className="m-auto  my-10 w-32 h-32 bg-white dark:bg-[#02040a] rounded-full flex justify-center items-center relative before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-blue-500/30 before:to-purple-500/30 before:blur-xl before:-z-10 ">
-          <Player
-            src={
-              themeSelected
-                ? "/image/lottie/IA-animation-light.json"
-                : "/image/lottie/IA-animation.json"
-            }
-            loop
-            autoplay
-            className="w-36 h-36 loading-pulse"
-          />
+        <div
+          className="w-full flex gap-4 items-center pb-10"
+          data-aos="fade-in"
+          data-aos-duration="800"
+        >
+          <div className="w-14 h-14 bg-white dark:bg-[#02040a] rounded-full flex items-center relative before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-blue-500/20 before:to-purple-500/20 before:blur-xl before:-z-10">
+            <Player
+              src={
+                themeSelected
+                  ? "/image/lottie/IA-animation-light.json"
+                  : "/image/lottie/IA-animation.json"
+              }
+              loop
+              autoplay
+              className="w-14 h-14 loading-pulse"
+            />
+          </div>
+          <span className="text-gray-500 dark:text-gray-300 text-sm ">
+            Aguarde um momento...
+          </span>
         </div>
       ) : error && chatHistory.length === 0 ? (
         <div className="w-full h-full flex flex-col justify-center items-center">
@@ -432,7 +483,7 @@ export default function ChatView({
           <div className="w-fit text-gray-500 dark:text-gray-300 text-sm bg-green-50 border-green-300 dark:border-transparent border-1 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light ">
             <CheckCircle className="text-green-500" />
             <span className="flex items-center gap-2">
-              SQL gerado com sucesso! Para gerar outro,{" "}
+              SQL gerado com sucesso! Para iniciar uma nova conversa,{" "}
               <p
                 className="text-green-500 cursor-pointer underline"
                 onClick={() => {

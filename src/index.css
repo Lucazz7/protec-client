@@ -131,16 +131,16 @@
 
 
 .loading-pulse {
-  animation: pulsar 10s infinite ease-in-out;
+  animation: pulsar 6s infinite ease-in-out;
 }
 
 
 @keyframes pulsar {
   0%, 100% {
-    transform: scale(0.8);
+    transform: scale(0.6);
   }
   50% {
-    transform: scale(1);
+    transform: scale(1.2);
   }
 }
 
