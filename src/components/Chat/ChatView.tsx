@@ -414,11 +414,7 @@ export default function ChatView({
         })}
 
       {isLoading ? (
-        <div
-          className="w-full flex gap-4 items-center pb-10"
-          data-aos="fade-in"
-          data-aos-duration="800"
-        >
+        <div className="w-full flex gap-4 items-center pb-10">
           <div className="w-14 h-14 bg-white dark:bg-[#02040a] rounded-full flex items-center relative before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-blue-500/20 before:to-purple-500/20 before:blur-xl before:-z-10">
             <Player
               src={

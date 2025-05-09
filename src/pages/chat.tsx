@@ -47,7 +47,6 @@ export default function Chat() {
     const currentMessage = chatMessage;
     setChatMessage("");
 
-    // Adiciona a mensagem do usuário ao histórico
     const updatedHistory: Message[] = [
       ...chatHistory,
       {
@@ -68,10 +67,7 @@ export default function Chat() {
       }
 
       const isValidSQL = (sql: string): boolean => {
-        // Remove espaços extras e quebras de linha
         const cleanSQL = sql?.trim()?.replace(/\s+/g, " ");
-
-        // Verifica se começa com uma palavra-chave SQL
         const sqlKeywords = [
           "SELECT",
           "INSERT",
@@ -81,22 +77,15 @@ export default function Chat() {
           "ALTER",
           "DROP",
         ];
-
         const upperSQL = cleanSQL?.toUpperCase();
-
-        // Verifica se a string começa com uma palavra-chave SQL
         const startsWithKeyword = sqlKeywords?.some((keyword) =>
           upperSQL?.startsWith(keyword)
         );
-
-        // Verifica se contém elementos básicos de uma query
         const hasBasicElements =
-          upperSQL?.includes("FROM") || // Para SELECT
-          (upperSQL?.includes("INTO") && upperSQL?.includes("VALUES")) || // Para INSERT
-          (upperSQL?.includes("SET") && upperSQL?.includes("WHERE")) || // Para UPDATE
-          upperSQL?.includes("WHERE"); // Para DELETE
-
-        // Verifica se termina com ponto e vírgula (opcional)
+          upperSQL?.includes("FROM") ||
+          (upperSQL?.includes("INTO") && upperSQL?.includes("VALUES")) ||
+          (upperSQL?.includes("SET") && upperSQL?.includes("WHERE")) ||
+          upperSQL?.includes("WHERE");
         const endsWithSemicolon = cleanSQL?.trim()?.endsWith(";");
 
         return (
@@ -113,7 +102,6 @@ export default function Chat() {
 
       const validateSQL = isValidSQL(res?.data?.response);
 
-      // Adiciona a resposta da API ao histórico
       const newHistory: Message[] = [
         ...updatedHistory,
         {
@@ -122,7 +110,6 @@ export default function Chat() {
             ? "SQL_WITH_TABLE"
             : res?.data?.response_type,
           df: res?.data?.answer,
-
           question: validateSQL ? "" : res?.data?.response,
           sql:
             res?.data?.response_type === "SQL_WITH_TABLE" || validateSQL
@@ -144,8 +131,12 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [isCreating, chatHistory]);
+    const timeout = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, [chatHistory]);
 
   useEffect(() => {
     AOS.init({
