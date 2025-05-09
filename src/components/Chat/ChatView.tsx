@@ -303,16 +303,16 @@ export default function ChatView({
         })}
 
       {isLoading ? (
-        <div className={`flex justify-center items-center`}>
+        <div className="m-auto my-10 w-32 h-32 bg-white dark:bg-[#02040a] rounded-full flex justify-center items-center  relative before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-blue-500/40 before:to-purple-500/40 before:blur-xl before:-z-10">
           <Player
             src={
               themeSelected
-                ? "/image/lottie/IA-animation.json"
-                : "/image/lottie/IA-animation-light.json"
+                ? "/image/lottie/IA-animation-light.json"
+                : "/image/lottie/IA-animation.json"
             }
             loop
             autoplay
-            className="w-44 h-44"
+            className="w-36 h-36"
           />
         </div>
       ) : error && chatHistory.length === 0 ? (
