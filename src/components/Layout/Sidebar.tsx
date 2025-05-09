@@ -123,7 +123,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           v1.0.0
         </span>{" "}
         <div
-          className="flex lg:hidden items-center cursor-pointer me-auto dark:text-gray-200"
+          className="flex lg:hidden items-center cursor-pointer me-auto text-gray-500 dark:text-gray-200"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -227,7 +227,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>{" "}
         </div>
         <div className="w-full flex lg:hidden flex-col mt-auto ">
-          <hr className="w-full border-gray-300" />
+          <hr className="w-full border-gray-300 dark:border-gray-700" />
           <div className="w-full py-4 flex items-center gap-2 justify-between px-2 ">
             <div className="w-auto p-2 bg-gray-400 dark:bg-gray-700 rounded-full">
               <User size={20} />

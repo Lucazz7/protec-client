@@ -1,3 +1,4 @@
+import { Player } from "@lottiefiles/react-lottie-player";
 import { Button, ConfigProvider, Table } from "antd";
 import Aos from "aos";
 import {
@@ -62,10 +63,10 @@ export default function ChatView({
   }, []);
 
   return (
-    <div className="mx-auto h-full w-full md:max-w-3xl pb-6 space-y-6 font-inter text-sm">
+    <div className="mx-auto h-full w-full md:max-w-3xl pb-6 space-y-6 font-inter text-sm px-4 xl:px-0">
       {chatHistory.length > 0 &&
         chatHistory?.map((chat, index) => {
-          if (chat.sql || chat.df) {
+          if (chat.sql || chat.df || chat.response_type === "SQL_WITH_TABLE") {
             return (
               <div
                 key={index}
@@ -278,62 +279,10 @@ export default function ChatView({
                 className={`max-w-[80%] rounded-2xl  ${
                   chat.response_type === "user"
                     ? "bg-white dark:bg-[#101828b7] text-gray-600  dark:text-gray-300 p-2 px-4 rounded-br-none"
-                    : "  p-2 px-4 text-gray-500 dark:text-gray-300 rounded-bl-none "
+                    : "  p-2 px-4 text-gray-500 dark:text-gray-300 rounded-bl-none"
                 }`}
               >
-                {chat.response_type === "SQL_WITH_TABLE" ||
-                (chat.response_type !== "user" &&
-                  chat.question &&
-                  chat.question.toLowerCase().includes("select") &&
-                  (chat.question.toLowerCase().includes("from") ||
-                    chat.question.toLowerCase().includes("where"))) ? (
-                  <div className="flex flex-col gap-2">
-                    <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mt-2">
-                      SQL:
-                    </div>
-                    <pre className="bg-gray-100 dark:bg-[#10182898] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
-                      <ReactMarkdown>{chat.question}</ReactMarkdown>
-                    </pre>
-                    <div className="flex gap-2 mt-2 ">
-                      <Button
-                        type="text"
-                        size="small"
-                        className={`flex items-center gap-1  hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
-                          chat.is_correct === true
-                            ? "!text-blue-400"
-                            : "!text-gray-400 dark:!text-gray-300"
-                        }`}
-                        disabled={isLoadingRelevant}
-                        onClick={() => {
-                          handleRelevantMessage(chat.id, index, true);
-                        }}
-                      >
-                        {isLoadingRelevant ? (
-                          <Loader2 className="animate-spin" size={16} />
-                        ) : (
-                          <ThumbsUp size={16} className="hover:scale-110" />
-                        )}
-                        <span>Correto</span>
-                      </Button>
-                      <Button
-                        type="text"
-                        size="small"
-                        className={`flex items-center gap-1  hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
-                          chat.is_correct === false
-                            ? "!text-red-500 dark:!text-red-500"
-                            : "!text-gray-400 dark:!text-gray-300"
-                        }`}
-                        disabled={isLoadingRelevant}
-                        onClick={() => {
-                          handleRelevantMessage(chat.id, index, false);
-                        }}
-                      >
-                        <ThumbsDown size={16} />
-                        <span>Incorreto</span>
-                      </Button>
-                    </div>
-                  </div>
-                ) : chat.response_type === "error" ? (
+                {chat.response_type === "error" ? (
                   <div className="w-full flex flex-col gap-2">
                     <div className="w-full flex-col text-gray-500 text-sm bg-yellow-50 p-2 px-4 flex rounded gap-2 font-light">
                       <span className="flex items-center gap-2">
@@ -354,12 +303,17 @@ export default function ChatView({
         })}
 
       {isLoading ? (
-        <div
-          className={` flex justify-start items-center ${
-            chatHistory.length === 0 ? "w-full h-full" : ""
-          }`}
-        >
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 my-6"></div>
+        <div className={`flex justify-center items-center`}>
+          <Player
+            src={
+              themeSelected
+                ? "/image/lottie/IA-animation.json"
+                : "/image/lottie/IA-animation-light.json"
+            }
+            loop
+            autoplay
+            className="w-44 h-44"
+          />
         </div>
       ) : error && chatHistory.length === 0 ? (
         <div className="w-full h-full flex flex-col justify-center items-center">

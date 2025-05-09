@@ -163,11 +163,7 @@ export default function Chat() {
         {chatHistory.length > 0 && (
           <div
             ref={chatContainerRef}
-            className={`w-full overflow-y-auto mx-auto px-2 md:px-0 ${
-              !id || (id && chatHistory.length > 0)
-                ? "h-[72%] min-h-[72%]"
-                : "h-full"
-            }`}
+            className={`w-full overflow-y-auto mx-auto px-2 md:px-0 h-full`}
           >
             <ChatView
               chatHistory={chatHistory}
@@ -181,7 +177,7 @@ export default function Chat() {
         !id ||
         chatHistory.length > 0 ? (
           <div
-            className={`w-full md:h-[25%] max-w-3xl mx-auto mb-4 px-2 mt-auto`}
+            className={`w-full max-w-3xl mx-auto mb-4 px-2 mt-auto`}
             data-aos="zoom-in"
             data-aos-duration="700"
           >
