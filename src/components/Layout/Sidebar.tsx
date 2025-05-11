@@ -1,7 +1,7 @@
 import {
-  ArrowRight,
   Database,
   History,
+  LogOut,
   Menu,
   Moon,
   Plus,
@@ -29,6 +29,7 @@ const listMenu = [
 import AOS from "aos";
 import { useCallback, useEffect, useState } from "react";
 import { setTheme } from "../../store/redux/themeSlice";
+import GradientText from "../GradientText";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -117,20 +118,20 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           >
             Protec
           </span>
-          <span
-            className="text-sm text-gray-500 dark:text-gray-200 pt-11 -ms-4 -mt-2"
-            data-aos="fade-left"
-            data-aos-duration="1000"
-          >
-            AI Chatbot
-          </span>
+
+          <GradientText
+            text=""
+            gradientText="AI Expert"
+            gradientColors="from-pink-600 to-blue-800"
+            className="text-sm  pt-11 -ms-2 -mt-2"
+          />
         </div>
         <span className="hidden lg:flex text-sm text-gray-500 dark:text-gray-200 absolute right-0 bottom-0">
           v1.0.0
         </span>{" "}
         <button
           onClick={toggleTheme}
-          className="absolute right-0 top-0 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          className="hidden lg:flex absolute right-0 top-0 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
         >
           {isDarkMode ? (
             <Sun size={18} className="text-yellow-500" />
@@ -238,9 +239,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             <span className="text-gray-700 dark:text-gray-200 font-semibold">
               Protec AI Chatbot
             </span>
-            <ArrowRight
+            <LogOut
               size={18}
               className="text-gray-500 dark:text-gray-200 cursor-pointer"
+              onClick={() => navigate("/login")}
             />
           </div>
         </div>
@@ -255,9 +257,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             Protec AI Chatbot
           </span>
           <div className="flex items-center gap-2">
-            <ArrowRight
+            <LogOut
               size={18}
-              className="text-gray-500 dark:text-gray-400 cursor-pointer"
+              className="text-gray-500 dark:text-gray-200 cursor-pointer"
+              onClick={() => navigate("/login")}
             />
           </div>
         </div>

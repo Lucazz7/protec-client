@@ -3,6 +3,12 @@
 
 @import "tailwindcss";
 
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 
@@ -77,9 +83,18 @@
   }
 }
 
+
 @theme {
   --font-inter: "Inter", sans-serif;
   --font-orbitron: "Orbitron", sans-serif;
+
+  --animate-rotate-border: border-rotate 3s linear infinite;
+
+  @keyframes border-rotate {
+    to {
+      --border-angle: 360deg;
+    }
+  }
 }
 
 ::-webkit-scrollbar {
@@ -143,4 +158,5 @@
     transform: scale(1.2);
   }
 }
+
 

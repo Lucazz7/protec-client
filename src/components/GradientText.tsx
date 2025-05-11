@@ -1,3 +1,6 @@
+import AOS from "aos";
+import { useEffect } from "react";
+
 interface GradientTextProps {
   text: string;
   gradientText?: string;
@@ -11,6 +14,13 @@ export default function GradientText({
   className = "",
   gradientColors = "from-purple-500 to-indigo-600",
 }: GradientTextProps) {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+
   return (
     <div
       className={`${className} flex flex-row justify-center items-center gap-2`}

@@ -428,7 +428,7 @@ export default function ChatView({
             />
           </div>
           <span className="text-gray-500 dark:text-gray-300 text-sm ">
-            Aguarde um momento...
+            Aguarde estou pensando...
           </span>
         </div>
       ) : error && chatHistory.length === 0 ? (
