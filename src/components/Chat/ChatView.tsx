@@ -142,7 +142,7 @@ export default function ChatView({
                     </div>
                     {editingSQL === index ? (
                       <div className="w-full flex flex-col gap-2">
-                        <pre className="bg-gray-100 dark:bg-[#10182898]  shadow-sm rounded text-xs overflow-x-auto ">
+                        <pre className="bg-gray-100 dark:bg-[#10182898] shadow-sm rounded text-xs overflow-x-auto ">
                           <TextareaAutosize
                             className="w-full p-2 px-5 text-gray-700 dark:text-gray-300 "
                             value={editedSQL}
@@ -199,7 +199,7 @@ export default function ChatView({
                       !editingSQL && (
                         <div className="w-fit max-w-[80%] my-2 text-gray-500 dark:text-gray-300 text-sm bg-yellow-50 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light">
                           <AlertCircle className="text-yellow-500" />
-                          <span className="flex items-center gap-2">
+                          <span className="flex gap-2">
                             Para editar o SQL gerado,{" "}
                             <p
                               className="text-yellow-500 cursor-pointer underline"
@@ -476,18 +476,35 @@ export default function ChatView({
       {chatHistory[chatHistory.length - 1]?.response_type ===
         "SQL_WITH_TABLE" && (
         <div className="w-full max-w-3xl flex justify-center">
-          <div className="w-fit text-gray-500 dark:text-gray-300 text-sm bg-green-50 border-green-300 dark:border-transparent border-1 dark:bg-gray-900 p-2 px-4 rounded-full flex items-center gap-2 font-light ">
+          <div className="w-fit text-gray-500 dark:text-gray-300 text-sm bg-green-50 border-green-300 dark:border-transparent border-1 dark:bg-gray-900 p-2 px-4 rounded-lg md:rounded-full flex flex-col md:flex-row items-center gap-2 font-light ">
             <CheckCircle className="text-green-500" />
-            <span className="flex items-center gap-2">
-              SQL gerado com sucesso! Para iniciar uma nova conversa,{" "}
+            <span className="flex flex-col md:flex-row items-center">
+              <span className="hidden md:block">
+                SQL gerado com sucesso! Para iniciar uma nova conversa,{" "}
+              </span>
+              <span className="block md:hidden">
+                SQL gerado com sucesso! Para iniciar uma nova conversa clique no
+                botão abaixo.
+              </span>
               <p
-                className="text-green-500 cursor-pointer underline"
+                className="text-green-500 cursor-pointer underline hidden md:block ms-1"
                 onClick={() => {
                   handleReset();
                 }}
               >
                 clique aqui
-              </p>
+              </p>{" "}
+              <Button
+                type="text"
+                size="small"
+                className="!text-green-500 cursor-pointer block md:!hidden !border-green-500 !rounded-full mt-2"
+                onClick={() => {
+                  handleReset();
+                }}
+              >
+                <Plus size={16} />
+                Nova conversa
+              </Button>
             </span>
           </div>
         </div>

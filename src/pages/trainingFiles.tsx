@@ -158,61 +158,84 @@ export default function TrainingFiles() {
         </div>
       </div>
       <div className="w-full h-full p-4">
-        <div className="w-full bg-white dark:bg-[#101828] rounded-lg h-full dark:text-gray-200 dark:border-gray-700">
+        <div className="w-full  rounded-lg h-full dark:text-gray-200 dark:border-gray-700">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 size={24} className="animate-spin" />
             </div>
-          ) : (
-            <ConfigProvider
-              theme={
-                theme
-                  ? {
-                      token: {
-                        colorPrimary: "#e5e7eb",
-                        colorText: "#e5e7eb",
-                        colorBorder: "#364153",
-                        colorBgContainer: "#101828",
-                      },
-                      components: {
-                        Table: {
-                          headerBg: "#101828",
-                          headerColor: "#e5e7eb",
-                          stickyScrollBarBg: "#031842c5",
-                          stickyScrollBarBorderRadius: 4,
-                          borderColor: "#364153",
-                          headerSplitColor: "#364153",
-                        },
-                        Pagination: {
-                          colorBgContainer: "#101828a2",
-                        },
-                      },
-                    }
-                  : undefined
-              }
-            >
-              <Table
-                className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
-                bordered={false}
-                dataSource={getTableData}
-                columns={columns}
-                scroll={{
-                  x: true,
-                  y:
-                    !viewAll && getTableData.length < 10
-                      ? "calc(100vh - 220px)"
-                      : "calc(100vh - 260px)",
-                }}
-                pagination={
-                  !viewAll && getTableData.length > 10
+          ) : getTableData.length > 0 ? (
+            <div className="w-full h-full bg-white dark:bg-[#101828]">
+              <ConfigProvider
+                theme={
+                  theme
                     ? {
-                        pageSize: 10,
-                        position: ["bottomCenter"],
+                        token: {
+                          colorPrimary: "#e5e7eb",
+                          colorText: "#e5e7eb",
+                          colorBorder: "#364153",
+                          colorBgContainer: "#101828",
+                        },
+                        components: {
+                          Table: {
+                            headerBg: "#101828",
+                            headerColor: "#e5e7eb",
+                            stickyScrollBarBg: "#031842c5",
+                            stickyScrollBarBorderRadius: 4,
+                            borderColor: "#364153",
+                            headerSplitColor: "#364153",
+                          },
+                          Pagination: {
+                            colorBgContainer: "#101828a2",
+                          },
+                        },
                       }
-                    : false
+                    : undefined
                 }
-              />
-            </ConfigProvider>
+              >
+                <Table
+                  className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
+                  bordered={false}
+                  dataSource={getTableData}
+                  columns={columns}
+                  scroll={{
+                    x: true,
+                    y:
+                      !viewAll && getTableData.length < 10
+                        ? "calc(100vh - 220px)"
+                        : "calc(100vh - 260px)",
+                  }}
+                  pagination={
+                    !viewAll && getTableData.length > 10
+                      ? {
+                          pageSize: 10,
+                          position: ["bottomCenter"],
+                        }
+                      : false
+                  }
+                />
+              </ConfigProvider>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full relative gap-4">
+              <div className="flex flex-col items-center justify-center">
+                <img
+                  src="/image/No data-bro.png"
+                  alt="empty"
+                  className="w-full max-h-[450px]"
+                />
+                <span className="px-4 md:px-0 text-center text-sm md:text-base text-gray-400 dark:text-gray-300 py-4">
+                  Nenhum dado de treinamento encontrado, deseja adicionar clique
+                  no botão abaixo.
+                </span>
+                <Button
+                  className="!text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <Plus size={16} />
+                  Adicionar
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </div>

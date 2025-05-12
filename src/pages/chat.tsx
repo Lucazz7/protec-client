@@ -152,14 +152,14 @@ export default function Chat() {
   return (
     <div className="w-full h-full flex flex-col font-inter overflow-y-auto">
       {chatHistory.length > 0 && (
-        <div className="w-full min-[400px]:h-[20%] md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm dark:bg-gray-900">
+        <div className="w-full min-[400px]:h-32 md:h-[8%] p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm dark:bg-gray-900">
           <HeaderChatView setMessage={setChatMessage} />
         </div>
       )}
       <div
         className={`w-full ${
           chatHistory.length > 0
-            ? "h-[70%] min-[400px]:h-[75%] min-[400px]:min-h-[75%] md:h-[92%] md:min-[400px]:min-h-[92%]"
+            ? "h-[calc(100%-135px)] md:min-[400px]:min-h-[92%]"
             : "h-full md:h-auto  md:my-auto"
         } mx-auto flex flex-col py-4 md:justify-center gap-2  md:px-2`}
       >

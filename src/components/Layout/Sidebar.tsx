@@ -200,6 +200,16 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 <History size={20} />
                 Conversas Recentes
               </span>
+              <button
+                onClick={toggleTheme}
+                className="flex lg:hidden p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                {isDarkMode ? (
+                  <Sun size={18} className="text-yellow-500" />
+                ) : (
+                  <Moon size={18} className="text-gray-700" />
+                )}
+              </button>
             </div>
             <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2 gap-1">
               {isLoadingHistory || isFetchingHistory ? (
