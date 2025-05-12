@@ -74,9 +74,8 @@ export default function Login() {
           <div
             key={loginOrRegister ? "login" : "register"}
             className=" flex items-center justify-center z-10 absolute"
-            data-aos={loginOrRegister ? " fade-left" : "fade-right"}
-            data-aos-duration="700"
-            data-aos-delay="250"
+            data-aos={loginOrRegister ? "fade-right" : "fade-left"}
+            data-aos-duration="400"
           >
             <Player
               src={
@@ -118,9 +117,8 @@ export default function Login() {
         <div
           className="w-full lg:w-1/2 h-full  text-black dark:text-white flex justify-center px-4 md:px-0"
           key={loginOrRegister ? "login" : "register"}
-          data-aos={!loginOrRegister ? "fade-left" : "fade-right"}
-          data-aos-duration="700"
-          data-aos-delay="250"
+          data-aos={!loginOrRegister ? "fade-right" : "fade-left"}
+          data-aos-duration="400"
         >
           <button
             onClick={toggleTheme}
