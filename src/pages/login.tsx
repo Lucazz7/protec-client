@@ -3,7 +3,7 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import { Button, Input } from "antd";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { z } from "zod";
 import GradientText from "../components/GradientText";
@@ -12,8 +12,16 @@ import { setTheme } from "../store/redux/themeSlice";
 
 // Schema de validação
 const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  email: z
+    .string({
+      required_error: "Email é obrigatório",
+    })
+    .email("Email inválido"),
+  password: z
+    .string({
+      required_error: "Senha é obrigatória",
+    })
+    .min(6, "A senha deve ter no mínimo 6 caracteres"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -24,7 +32,7 @@ export default function Login() {
   const themeSelected = useAppSelector((state) => state.themeSlice.theme);
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
@@ -92,58 +100,78 @@ export default function Login() {
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full space-y-4 "
               >
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm text-gray-500 dark:text-gray-300 mb-1"
-                  >
-                    Email
-                  </label>
-                  <Input
-                    {...register("email")}
-                    type="email"
-                    id="email"
-                    size="large"
-                    placeholder="Insira seu e-mail"
-                    status={errors.email ? "error" : ""}
-                    className="dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 dark:!border-[#5b5b5c]"
-                    classNames={{
-                      input:
-                        "dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300",
-                    }}
-                  />
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.email.message}
-                    </p>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field }) => (
+                    <div>
+                      <label
+                        htmlFor="email"
+                        className="block text-sm text-gray-500 dark:text-gray-300 mb-1"
+                      >
+                        Email
+                      </label>
+                      <Input
+                        {...field}
+                        type="email"
+                        id="email"
+                        size="large"
+                        placeholder="Insira seu e-mail"
+                        status={errors.email ? "error" : ""}
+                        className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 ${
+                          errors.email
+                            ? "border-red-500"
+                            : "dark:!border-[#5b5b5c] "
+                        }`}
+                        classNames={{
+                          input:
+                            "dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300",
+                        }}
+                      />
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
                   )}
-                </div>
+                />
 
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm text-gray-500 dark:text-gray-300 mb-1"
-                  >
-                    Senha
-                  </label>
-                  <Input.Password
-                    {...register("password")}
-                    id="password"
-                    placeholder="Insira seu senha"
-                    size="large"
-                    status={errors.password ? "error" : ""}
-                    className="dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 dark:!border-[#5b5b5c] "
-                    classNames={{
-                      input:
-                        "dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300",
-                    }}
-                  />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.password.message}
-                    </p>
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field }) => (
+                    <div>
+                      <label
+                        htmlFor="password"
+                        className="block text-sm text-gray-500 dark:text-gray-300 mb-1"
+                      >
+                        Senha
+                      </label>
+                      <Input.Password
+                        {...field}
+                        id="password"
+                        placeholder="Insira seu senha"
+                        size="large"
+                        status={errors.password ? "error" : ""}
+                        className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 ${
+                          errors.password
+                            ? "border-red-500"
+                            : "dark:!border-[#5b5b5c] "
+                        }`}
+                        classNames={{
+                          input:
+                            "dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300",
+                        }}
+                      />
+                      {errors.password && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.password.message}
+                        </p>
+                      )}
+                    </div>
                   )}
-                </div>
+                />
 
                 <div className="flex items-center justify-end">
                   <a
@@ -165,7 +193,7 @@ export default function Login() {
                 <div className="w-full flex justify-center items-center gap-2 text-sm mt-3">
                   <span className="text-gray-500">
                     Não tem uma conta?{" "}
-                    <a href="#" className="text-blue-600">
+                    <a href="#" className="text-blue-600 hover:text-gray-600">
                       Registre-se
                     </a>
                   </span>

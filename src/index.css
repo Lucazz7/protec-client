@@ -158,5 +158,25 @@
     transform: scale(1.2);
   }
 }
+/* Cor de fundo do autocomplete */ 
+.dark {
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px rgb(37, 39, 61) inset !important;
+  }
+
+  input:-webkit-autofill {
+    -webkit-text-fill-color: rgb(202, 202, 202) !important;
+  }
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px rgb(240, 250, 252) inset !important;
+
+}
+
+/* Cor do texto do autocomplete */
+input:-webkit-autofill {
+  -webkit-text-fill-color: rgb(95, 95, 95) !important;
+}
 
 
