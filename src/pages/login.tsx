@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { Button, Input } from "antd";
-import { Moon, Sun } from "lucide-react";
+import { EyeIcon, EyeOffIcon, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -9,6 +9,9 @@ import { z } from "zod";
 import GradientText from "../components/GradientText";
 import { useAppSelector } from "../store";
 import { setTheme } from "../store/redux/themeSlice";
+
+import AOS from "aos";
+import { useNavigate } from "react-router-dom";
 
 // Schema de validação
 const loginSchema = z.object({
@@ -27,6 +30,8 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const dispatch = useDispatch();
 
   const themeSelected = useAppSelector((state) => state.themeSlice.theme);
@@ -40,8 +45,9 @@ export default function Login() {
   });
 
   const onSubmit = (data: LoginFormData) => {
-    console.log(data);
-    // Implementar lógica de login aqui
+    if (data) {
+      navigate("/");
+    }
   };
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -66,14 +72,25 @@ export default function Login() {
     dispatch(setTheme(!isDarkMode));
   };
 
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+
   return (
-    <div className="w-full h-dvh flex font-inter p-2 lg:p-4">
-      <div className="w-full h-full flex bg-[#ffffff75] dark:bg-[#131324b4] shadow-md rounded-2xl">
-        <div className="w-full lg:w-1/2 h-full text-black dark:text-white flex justify-center px-4 md:px-0 ">
+    <div className="w-full h-dvh flex font-inter">
+      <div className="w-full h-full flex bg-[#ffffff75] dark:bg-[#131324d5]">
+        <div
+          className="w-full lg:w-1/2  h-full text-black dark:text-white flex justify-center px-4 md:px-0"
+          data-aos="fade-up"
+          data-aos-duration="700"
+        >
           <div className="from-black-500 w-full h-fit my-auto md:max-w-lg lg:max-w-md xl:max-w-lg scale-[1.03] animate-rotate-border cursor-pointer rounded-2xl bg-conic/[from_var(--border-angle)] from-80% via-pink-600 via-90% to-blue-800 to-100% p-px transition-all duration-500 ease-out transform-3d">
-            <div className=" bg-white dark:bg-gray-900 flex flex-col items-center justify-center rounded-2xl shadow-xl p-10 py-6">
-              <div className="flex flex-col justify-between items-center pb-8">
-                <div className="w-full h-full flex relative ">
+            <div className=" bg-white dark:bg-gray-900 flex flex-col items-center px-10 rounded-2xl shadow-xl min-h-[500px] ">
+              <div className="flex flex-col items-center justify-center gap-2 mt-10">
+                <div className="w-full h-full flex relative items-center justify-center ">
                   <span className="text-5xl font-semibold text-gray-600 dark:text-blue-200">
                     Protec
                   </span>
@@ -83,6 +100,9 @@ export default function Login() {
                     gradientColors="from-pink-600 to-blue-800"
                     className="text-2xl min-[390px]:text-3xl pt-14 -ms-3 -mt-2"
                   />
+                </div>
+                <div className="font-sans font-medium text-xs text-gray-400 dark:text-blue-200">
+                  Transforme seus dados em resultados eficientes
                 </div>
               </div>
               <button
@@ -98,7 +118,7 @@ export default function Login() {
 
               <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full space-y-4 "
+                className="w-full space-y-5 my-auto"
               >
                 <Controller
                   control={control}
@@ -153,6 +173,13 @@ export default function Login() {
                         id="password"
                         placeholder="Insira seu senha"
                         size="large"
+                        iconRender={(visible) =>
+                          visible ? (
+                            <EyeIcon size={18} />
+                          ) : (
+                            <EyeOffIcon size={18} />
+                          )
+                        }
                         status={errors.password ? "error" : ""}
                         className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 ${
                           errors.password
@@ -181,7 +208,7 @@ export default function Login() {
                     Esqueceu sua senha?
                   </a>
                 </div>
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center mt-8">
                   <Button
                     type="primary"
                     htmlType="submit"
@@ -190,7 +217,7 @@ export default function Login() {
                     Entrar
                   </Button>
                 </div>
-                <div className="w-full flex justify-center items-center gap-2 text-sm mt-3">
+                <div className="w-full flex justify-center items-center gap-2 text-sm ">
                   <span className="text-gray-500">
                     Não tem uma conta?{" "}
                     <a href="#" className="text-blue-600 hover:text-gray-600">
@@ -203,7 +230,12 @@ export default function Login() {
           </div>
         </div>
         <div className="hidden lg:flex relative lg:w-1/2 h-full  justify-center items-center">
-          <div className="w-96 h-96  rounded-full flex items-center justify-center z-10 absolute">
+          <div
+            className="w-96 h-96  rounded-full flex items-center justify-center z-10"
+            data-aos="fade-up"
+            data-aos-duration="700"
+            data-aos-delay="250"
+          >
             <Player
               src={
                 themeSelected
@@ -212,7 +244,7 @@ export default function Login() {
               }
               loop
               autoplay
-              className="w-96 h-96 m-auto"
+              className="w-[420px] h-[420px] m-auto"
             />
           </div>
         </div>
