@@ -1,54 +1,20 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Player } from "@lottiefiles/react-lottie-player";
-import { Button, Input } from "antd";
-import { EyeIcon, EyeOffIcon, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { z } from "zod";
 import GradientText from "../components/GradientText";
 import { useAppSelector } from "../store";
 import { setTheme } from "../store/redux/themeSlice";
 
 import AOS from "aos";
-import { useNavigate } from "react-router-dom";
-
-// Schema de validação
-const loginSchema = z.object({
-  email: z
-    .string({
-      required_error: "Email é obrigatório",
-    })
-    .email("Email inválido"),
-  password: z
-    .string({
-      required_error: "Senha é obrigatória",
-    })
-    .min(6, "A senha deve ter no mínimo 6 caracteres"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { Moon, Sun } from "lucide-react";
+import Typewriter from "typewriter-effect";
+import LoginForm from "../components/forms/LoginForm";
+import RegisterForm from "../components/forms/RegisterForm";
 
 export default function Login() {
-  const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
   const themeSelected = useAppSelector((state) => state.themeSlice.theme);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = (data: LoginFormData) => {
-    if (data) {
-      navigate("/");
-    }
-  };
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -57,6 +23,7 @@ export default function Login() {
     ).matches;
     return savedTheme === "dark" || (!savedTheme && prefersDark);
   });
+  const [loginOrRegister, setLoginOrRegister] = useState(true);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -79,173 +46,154 @@ export default function Login() {
     });
   }, []);
 
+  useEffect(() => {
+    AOS.refresh();
+  }, [loginOrRegister]);
+
+  const phrases = [
+    "Assistente especializado em consultas SQL com suporte a múltiplos bancos de dados",
+    "Análise avançada de dados com insights personalizados para seu negócio",
+    "Exportação flexível para Excel, CSV e outros formatos com um clique",
+    "Respostas contextuais e precisas baseadas na estrutura do seu banco de dados",
+    "Geração dinâmica de tabelas e visualizações interativas dos resultados",
+    "Otimização automática de consultas SQL para melhor performance",
+    "Integração simples com seu banco de dados existente",
+    "Treinamento personalizado através de arquivos de conhecimento",
+    "Visualização gráfica dos dados com múltiplos tipos de gráficos",
+    "Sugestões inteligentes para melhorar suas consultas SQL",
+  ];
+
   return (
-    <div className="w-full h-dvh flex font-inter">
-      <div className="w-full h-full flex bg-[#ffffff75] dark:bg-[#131324d5]">
-        <div
-          className="w-full lg:w-1/2  h-full text-black dark:text-white flex justify-center px-4 md:px-0"
-          data-aos="fade-up"
-          data-aos-duration="700"
-        >
-          <div className="from-black-500 w-full h-fit my-auto md:max-w-lg lg:max-w-md xl:max-w-lg scale-[1.03] animate-rotate-border cursor-pointer rounded-2xl bg-conic/[from_var(--border-angle)] from-80% via-pink-600 via-90% to-blue-800 to-100% p-px transition-all duration-500 ease-out transform-3d">
-            <div className=" bg-white dark:bg-gray-900 flex flex-col items-center px-10 rounded-2xl shadow-xl min-h-[500px] ">
-              <div className="flex flex-col items-center justify-center gap-2 mt-10">
-                <div className="w-full h-full flex relative items-center justify-center ">
-                  <span className="text-5xl font-semibold text-gray-600 dark:text-blue-200">
-                    Protec
-                  </span>
-                  <GradientText
-                    text=""
-                    gradientText="AI Expert"
-                    gradientColors="from-pink-600 to-blue-800"
-                    className="text-2xl min-[390px]:text-3xl pt-14 -ms-3 -mt-2"
-                  />
-                </div>
-                <div className="font-sans font-medium text-xs text-gray-400 dark:text-blue-200">
-                  Transforme seus dados em resultados eficientes
-                </div>
-              </div>
-              <button
-                onClick={toggleTheme}
-                className="absolute right-3 top-3 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                {isDarkMode ? (
-                  <Sun size={18} className="text-yellow-500" />
-                ) : (
-                  <Moon size={18} className="text-gray-700" />
-                )}
-              </button>
-
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-full space-y-5 my-auto"
-              >
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field }) => (
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm text-gray-500 dark:text-gray-300 mb-1"
-                      >
-                        Email
-                      </label>
-                      <Input
-                        {...field}
-                        type="email"
-                        id="email"
-                        size="large"
-                        placeholder="Insira seu e-mail"
-                        status={errors.email ? "error" : ""}
-                        className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 ${
-                          errors.email
-                            ? "border-red-500"
-                            : "dark:!border-[#5b5b5c] "
-                        }`}
-                        classNames={{
-                          input:
-                            "dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300",
-                        }}
-                      />
-                      {errors.email && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
-
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field }) => (
-                    <div>
-                      <label
-                        htmlFor="password"
-                        className="block text-sm text-gray-500 dark:text-gray-300 mb-1"
-                      >
-                        Senha
-                      </label>
-                      <Input.Password
-                        {...field}
-                        id="password"
-                        placeholder="Insira seu senha"
-                        size="large"
-                        iconRender={(visible) =>
-                          visible ? (
-                            <EyeIcon size={18} />
-                          ) : (
-                            <EyeOffIcon size={18} />
-                          )
-                        }
-                        status={errors.password ? "error" : ""}
-                        className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 ${
-                          errors.password
-                            ? "border-red-500"
-                            : "dark:!border-[#5b5b5c] "
-                        }`}
-                        classNames={{
-                          input:
-                            "dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300",
-                        }}
-                      />
-                      {errors.password && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {errors.password.message}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
-
-                <div className="flex items-center justify-end">
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100"
-                  >
-                    Esqueceu sua senha?
-                  </a>
-                </div>
-                <div className="flex items-center justify-center mt-8">
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    className="!px-20 !bg-blue-600 hover:!bg-blue-700 uppercase !font-semibold rounded-xl"
-                  >
-                    Entrar
-                  </Button>
-                </div>
-                <div className="w-full flex justify-center items-center gap-2 text-sm ">
-                  <span className="text-gray-500">
-                    Não tem uma conta?{" "}
-                    <a href="#" className="text-blue-600 hover:text-gray-600">
-                      Registre-se
-                    </a>
-                  </span>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        <div className="hidden lg:flex relative lg:w-1/2 h-full  justify-center items-center">
+    <div className="w-full h-dvh flex font-inter ">
+      <div
+        className={`w-full h-full flex transition-all duration-300 ease-linear transform relative ${
+          loginOrRegister ? "flex-row-reverse" : "flex-row"
+        } bg-white dark:bg-gray-900 p-4`}
+      >
+        <div className="hidden lg:flex relative lg:w-1/2 h-full justify-center items-center rounded-4xl bg-animated-gradient dark:bg-gray-900">
           <div
-            className="w-96 h-96  rounded-full flex items-center justify-center z-10"
-            data-aos="fade-up"
+            key={loginOrRegister ? "login" : "register"}
+            className=" flex items-center justify-center z-10 absolute"
+            data-aos={loginOrRegister ? " fade-left" : "fade-right"}
             data-aos-duration="700"
             data-aos-delay="250"
           >
             <Player
               src={
                 themeSelected
-                  ? "/image/lottie/IA-animation-light.json"
-                  : "/image/lottie/IA-animation.json"
+                  ? "/image/lottie/IA-animation2.json"
+                  : "/image/lottie/IA-animation-light.json"
               }
               loop
               autoplay
-              className="w-[420px] h-[420px] m-auto"
+              className="w-[520px] h-[520px] m-auto"
             />
+          </div>
+          <div className="w-full h-full flex flex-col items-center justify-center z-20 bg-[#d8d8d81e] dark:bg-[#1313243d] rounded-4xl p-10">
+            <div className="w-full h-full flex flex-col items-center justify-between">
+              <img
+                src="/image/svg/biofy-logo.svg"
+                alt="Biofy"
+                className="w-52 invert dark:invert-0"
+              />
+              <div className="text-sm py-10 text-gray-500 dark:text-gray-300 font-inter max-w-xl mt-auto rounded-lg ">
+                <Typewriter
+                  options={{
+                    strings: phrases,
+                    autoStart: true,
+                    loop: true,
+                    deleteSpeed: 50,
+                    delay: 50,
+                    cursor: "|",
+                    wrapperClassName: "typewriter-wrapper",
+                  }}
+                />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-500 dark:text-blue-200">
+                Protec AI Expert
+              </h2>
+            </div>
+          </div>
+        </div>
+        <div
+          className="w-full lg:w-1/2 h-full  text-black dark:text-white flex justify-center px-4 md:px-0"
+          key={loginOrRegister ? "login" : "register"}
+          data-aos={!loginOrRegister ? "fade-left" : "fade-right"}
+          data-aos-duration="700"
+          data-aos-delay="250"
+        >
+          <button
+            onClick={toggleTheme}
+            className="absolute right-3 top-3 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            {isDarkMode ? (
+              <Sun size={18} className="text-yellow-500" />
+            ) : (
+              <Moon size={18} className="text-gray-700" />
+            )}
+          </button>
+          <div className="w-full my-auto h-fit md:max-w-lg lg:max-w-md xl:max-w-xl  flex flex-col items-center px-10 min-h-[550px] relative">
+            <div className="font-mono font-medium text-xl text-gray-400 dark:text-blue-200">
+              <span
+                className={`text-gray-400 dark:text-blue-200 cursor-pointer ${
+                  loginOrRegister ? "underline underline-offset-4" : ""
+                }`}
+                onClick={() => setLoginOrRegister(true)}
+              >
+                LOGIN
+              </span>{" "}
+              |{" "}
+              <span
+                className={`text-gray-400 dark:text-blue-200 cursor-pointer ${
+                  !loginOrRegister ? "underline underline-offset-4" : ""
+                }`}
+                onClick={() => setLoginOrRegister(false)}
+              >
+                REGISTRA-SE
+              </span>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-2 my-6">
+              <div className="w-full h-full flex relative items-center justify-center ">
+                <span className="text-7xl font-semibold text-gray-600 dark:text-blue-200">
+                  Protec
+                </span>
+                <GradientText
+                  text=""
+                  gradientText="AI Expert"
+                  gradientColors="from-pink-600 to-blue-800"
+                  className="text-2xl min-[390px]:text-4xl pt-24 -ms-3 -mt-2"
+                />
+              </div>
+              <div className="font-sans font-medium text-base text-gray-400 dark:text-blue-200">
+                Transforme seus dados em resultados eficientes
+              </div>
+            </div>
+            {loginOrRegister ? <LoginForm /> : <RegisterForm />}
+            <div className="w-full flex justify-center items-center gap-2 text-base mt-6">
+              {loginOrRegister ? (
+                <span className="text-gray-500">
+                  Não tem uma conta?{" "}
+                  <a
+                    href="#"
+                    className="text-blue-600 hover:text-gray-600"
+                    onClick={() => setLoginOrRegister(false)}
+                  >
+                    Registre-se
+                  </a>
+                </span>
+              ) : (
+                <span className="text-gray-500">
+                  Já tem uma conta?{" "}
+                  <a
+                    href="#"
+                    className="text-blue-600 hover:text-gray-600"
+                    onClick={() => setLoginOrRegister(true)}
+                  >
+                    Faça login
+                  </a>
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

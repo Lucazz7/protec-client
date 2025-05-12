@@ -179,4 +179,28 @@ input:-webkit-autofill {
   -webkit-text-fill-color: rgb(95, 95, 95) !important;
 }
 
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-animated-gradient {
+  background: linear-gradient(to top right, #bfdbfe, #dbeafe, #fecdd3);
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease-in-out infinite;
+}
+
+.dark .bg-animated-gradient  {
+  background: linear-gradient(to top right, #fc0404, #024192, #e46815);
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease-in-out infinite;
+}
+
 
