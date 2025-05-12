@@ -1,20 +1,17 @@
-import { Player } from "@lottiefiles/react-lottie-player";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import GradientText from "../components/GradientText";
-import { useAppSelector } from "../store";
 import { setTheme } from "../store/redux/themeSlice";
 
 import AOS from "aos";
 import { Moon, Sun } from "lucide-react";
-import Typewriter from "typewriter-effect";
+
+import AnimationLogin from "../components/AnimationLogin";
 import LoginForm from "../components/forms/LoginForm";
 import RegisterForm from "../components/forms/RegisterForm";
 
 export default function Login() {
   const dispatch = useDispatch();
-
-  const themeSelected = useAppSelector((state) => state.themeSlice.theme);
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -50,19 +47,6 @@ export default function Login() {
     AOS.refresh();
   }, [loginOrRegister]);
 
-  const phrases = [
-    "Assistente especializado em consultas SQL com suporte a múltiplos bancos de dados",
-    "Análise avançada de dados com insights personalizados para seu negócio",
-    "Exportação flexível para Excel, CSV e outros formatos com um clique",
-    "Respostas contextuais e precisas baseadas na estrutura do seu banco de dados",
-    "Geração dinâmica de tabelas e visualizações interativas dos resultados",
-    "Otimização automática de consultas SQL para melhor performance",
-    "Integração simples com seu banco de dados existente",
-    "Treinamento personalizado através de arquivos de conhecimento",
-    "Visualização gráfica dos dados com múltiplos tipos de gráficos",
-    "Sugestões inteligentes para melhorar suas consultas SQL",
-  ];
-
   return (
     <div className="w-full h-dvh flex font-inter ">
       <div
@@ -70,50 +54,8 @@ export default function Login() {
           loginOrRegister ? "flex-row-reverse" : "flex-row"
         } bg-white dark:bg-gray-900 p-4`}
       >
-        <div className="hidden lg:flex relative lg:w-1/2 h-full justify-center items-center rounded-4xl bg-animated-gradient dark:bg-gray-900">
-          <div
-            key={loginOrRegister ? "login" : "register"}
-            className=" flex items-center justify-center z-10 absolute"
-            data-aos={loginOrRegister ? "fade-right" : "fade-left"}
-            data-aos-duration="400"
-          >
-            <Player
-              src={
-                themeSelected
-                  ? "/image/lottie/IA-animation2.json"
-                  : "/image/lottie/IA-animation-light.json"
-              }
-              loop
-              autoplay
-              className="w-[520px] h-[520px] m-auto"
-            />
-          </div>
-          <div className="w-full h-full flex flex-col items-center justify-center z-20 bg-[#d8d8d81e] dark:bg-[#1313243d] rounded-4xl p-10">
-            <div className="w-full h-full flex flex-col items-center justify-between">
-              <img
-                src="/image/svg/biofy-logo.svg"
-                alt="Biofy"
-                className="w-52 invert dark:invert-0"
-              />
-              <div className="text-sm py-10 text-gray-500 dark:text-gray-300 font-inter max-w-xl mt-auto rounded-lg ">
-                <Typewriter
-                  options={{
-                    strings: phrases,
-                    autoStart: true,
-                    loop: true,
-                    deleteSpeed: 50,
-                    delay: 50,
-                    cursor: "|",
-                    wrapperClassName: "typewriter-wrapper",
-                  }}
-                />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-500 dark:text-blue-200">
-                Protec AI Expert
-              </h2>
-            </div>
-          </div>
-        </div>
+        <AnimationLogin loginOrRegister={loginOrRegister} />
+
         <div
           className="w-full lg:w-1/2 h-full  text-black dark:text-white flex justify-center px-4 md:px-0"
           key={loginOrRegister ? "login" : "register"}
@@ -122,7 +64,9 @@ export default function Login() {
         >
           <button
             onClick={toggleTheme}
-            className="absolute right-3 top-3 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className={`absolute ${
+              !loginOrRegister ? "right-3" : "right-8"
+            }  top-3 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer`}
           >
             {isDarkMode ? (
               <Sun size={18} className="text-yellow-500" />
