@@ -18,7 +18,10 @@ export function Router() {
   // const { useAuth } = useAppSelector(userAuth);
   // const isAuthenticated = useAuth?.jwt && useAuth?.isAuthenticated;
 
-  const publicRoutes = [{ path: "/login", element: <Login /> }];
+  const publicRoutes = [
+    { path: "/login", element: <Login /> },
+    { path: "/:resetPasswordOrRegister", element: <Login /> },
+  ];
 
   const privateRoutes = [
     {

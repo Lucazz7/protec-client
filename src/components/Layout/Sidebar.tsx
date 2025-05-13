@@ -1,14 +1,4 @@
-import {
-  Database,
-  History,
-  LogOut,
-  Menu,
-  Moon,
-  Plus,
-  Sun,
-  User,
-  X,
-} from "lucide-react";
+import { Database, History, LogOut, Menu, Plus, User, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { setChatHistory } from "../../store/redux/chatSlice";
@@ -27,9 +17,9 @@ const listMenu = [
 ];
 
 import AOS from "aos";
-import { useCallback, useEffect, useState } from "react";
-import { setTheme } from "../../store/redux/themeSlice";
+import { useCallback, useEffect } from "react";
 import GradientText from "../GradientText";
+import SwitchTheme from "../SwitchTheme";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -49,34 +39,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     isFetching: isFetchingHistory,
   } = useGetHistoryQuery();
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    return savedTheme === "dark" || (!savedTheme && prefersDark);
-  });
-
   useEffect(() => {
     AOS.init({
       duration: 1000,
       once: true,
     });
   }, []);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    dispatch(setTheme(!isDarkMode));
-  };
 
   const handleReset = useCallback(() => {
     dispatch(chatApi.util.resetApiState());
@@ -129,16 +97,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <span className="hidden lg:flex text-sm text-gray-500 dark:text-gray-200 absolute right-0 bottom-0">
           v1.0.0
         </span>{" "}
-        <button
-          onClick={toggleTheme}
-          className="hidden lg:flex absolute right-0 top-0 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          {isDarkMode ? (
-            <Sun size={18} className="text-yellow-500" />
-          ) : (
-            <Moon size={18} className="text-gray-700" />
-          )}
-        </button>
+        <div className="hidden lg:flex absolute right-0 top-0 ">
+          <SwitchTheme />
+        </div>
         <div
           className="flex lg:hidden items-center cursor-pointer me-auto text-gray-500 dark:text-gray-200"
           onClick={() => setIsOpen(!isOpen)}
@@ -200,16 +161,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 <History size={20} />
                 Conversas Recentes
               </span>
-              <button
-                onClick={toggleTheme}
-                className="flex lg:hidden p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                {isDarkMode ? (
-                  <Sun size={18} className="text-yellow-500" />
-                ) : (
-                  <Moon size={18} className="text-gray-700" />
-                )}
-              </button>
+              <div className="flex lg:hidden p-2 absolute right-0 top-0">
+                <SwitchTheme />
+              </div>
             </div>
             <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2 gap-1">
               {isLoadingHistory || isFetchingHistory ? (

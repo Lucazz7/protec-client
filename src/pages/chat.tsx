@@ -165,7 +165,7 @@ export default function Chat() {
       >
         {/* Header */}
         <div
-          className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center transition-all duration-500 overflow-hidden
+          className={`mx-auto h-full md:h-auto w-full max-w-3xl flex flex-col items-center transition-all duration-500 overflow-hidden pt-0  min-[400px]:pt-10 md:pt-0
             ${
               chatHistory.length > 0
                 ? "max-h-0 opacity-0 -translate-y-20 mb-0"

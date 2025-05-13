@@ -13,16 +13,6 @@ import chatSlice from "./redux/chatSlice";
 import themeSlice from "./redux/themeSlice";
 import { chatApi } from "./services/chatApi";
 import { trainingFilesApi } from "./services/trainingFiles";
-// import { persistReducer, persistStore } from "redux-persist";
-// import storage from "redux-persist/lib/storage";
-
-// const authPersistConfig = {
-//   key: "auth",
-//   storage,
-//   whitelist: ["token", "user", "refresh_token"],
-// };
-
-// const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 export const store = configureStore({
   reducer: {

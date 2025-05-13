@@ -1,9 +1,7 @@
 import { Player } from "@lottiefiles/react-lottie-player";
+import { useParams } from "react-router-dom";
 import Typewriter from "typewriter-effect";
 import { useAppSelector } from "../store";
-interface AnimationLoginProps {
-  loginOrRegister: boolean;
-}
 
 const phrases = [
   "Assistente especializado em consultas SQL com suporte a múltiplos bancos de dados",
@@ -18,17 +16,18 @@ const phrases = [
   "Sugestões inteligentes para melhorar suas consultas SQL",
 ];
 
-export default function AnimationLogin({
-  loginOrRegister,
-}: AnimationLoginProps) {
+export default function AnimationLogin() {
+  const { resetPasswordOrRegister } = useParams();
   const themeSelected = useAppSelector((state) => state.themeSlice.theme);
 
   return (
     <div className="hidden lg:flex relative lg:w-1/2 h-full justify-center items-center rounded-4xl bg-animated-gradient dark:bg-gray-900">
       <div
-        key={loginOrRegister ? "login" : "register"}
+        key={resetPasswordOrRegister}
         className=" flex items-center justify-center z-10 absolute"
-        data-aos={loginOrRegister ? "fade-right" : "fade-left"}
+        data-aos={
+          resetPasswordOrRegister !== "register" ? "fade-right" : "fade-left"
+        }
         data-aos-duration="400"
       >
         <Player
