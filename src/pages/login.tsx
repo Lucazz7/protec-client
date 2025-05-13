@@ -51,7 +51,7 @@ export default function Login() {
           </div>
 
           <div className="w-full my-auto h-fit md:max-w-lg lg:max-w-md xl:max-w-xl  flex flex-col items-center md:px-10 min-h-[550px] relative">
-            {resetPasswordOrRegister !== "resetPassword" && (
+            {resetPasswordOrRegister !== "reset-password" && (
               <SwitchLoginOrRegister />
             )}
             <div className="flex flex-col items-center justify-center gap-2 my-3 md:my-6">
@@ -70,7 +70,7 @@ export default function Login() {
                 Transforme seus dados em resultados eficientes
               </div>
             </div>
-            {resetPasswordOrRegister === "resetPassword" ? (
+            {resetPasswordOrRegister === "reset-password" ? (
               <ResetPasswordForm />
             ) : resetPasswordOrRegister === "register" ? (
               <RegisterForm />

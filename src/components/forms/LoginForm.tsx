@@ -117,7 +117,7 @@ export default function LoginForm() {
 
         <div className="flex items-center justify-end">
           <a
-            href="#"
+            href="/reset-password"
             className="text-xs sm:text-base text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100"
           >
             Esqueceu sua senha?
