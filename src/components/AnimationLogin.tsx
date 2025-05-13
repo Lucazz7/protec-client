@@ -39,15 +39,19 @@ export default function AnimationLogin({
           }
           loop
           autoplay
-          className="w-[520px] h-[520px] m-auto"
+          className="w-[300px] h-[300px] xl:w-[520px] xl:h-[520px] m-auto max-w-md max-h-md"
         />
       </div>
       <div className="w-full h-full flex flex-col items-center justify-center z-20 bg-[#d8d8d81e] dark:bg-[#1313243d] rounded-4xl p-10">
         <div className="w-full h-full flex flex-col items-center justify-between">
           <img
-            src="/image/svg/biofy-logo.svg"
+            src={
+              themeSelected
+                ? "/image/svg/biofy-logo.svg"
+                : "/image/svg/biofy-logo-light.svg"
+            }
             alt="Biofy"
-            className="w-52 invert dark:invert-0"
+            className="w-52"
           />
           <div className="text-sm py-10 text-gray-500 dark:text-gray-300 font-inter max-w-xl mt-auto rounded-lg ">
             <Typewriter

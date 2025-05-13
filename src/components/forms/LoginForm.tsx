@@ -60,7 +60,7 @@ export default function LoginForm() {
               size="large"
               placeholder="Insira seu e-mail"
               status={errors.email ? "error" : ""}
-              className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 !rounded-full !py-3 !px-5 ${
+              className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 !rounded-full sm:!py-3 !px-5 ${
                 errors.email ? "border-red-500" : "dark:!border-[#5b5b5c] "
               }`}
               classNames={{
@@ -97,7 +97,7 @@ export default function LoginForm() {
                 visible ? <EyeIcon size={18} /> : <EyeOffIcon size={18} />
               }
               status={errors.password ? "error" : ""}
-              className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 !rounded-full !py-3 !px-5 ${
+              className={`dark:!bg-gray-900 dark:!text-gray-200 dark:placeholder:!text-gray-300 !rounded-full sm:!py-3 !px-5 ${
                 errors.password ? "border-red-500" : "dark:!border-[#5b5b5c] "
               }`}
               classNames={{
@@ -117,7 +117,7 @@ export default function LoginForm() {
       <div className="flex items-center justify-end">
         <a
           href="#"
-          className="text-base text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100"
+          className="text-xs sm:text-base text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100"
         >
           Esqueceu sua senha?
         </a>
