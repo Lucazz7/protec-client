@@ -31,8 +31,11 @@ export interface Prompt {
 }
 
 export interface IHistoryQuestion {
-  questions: IQuestion[];
-  type: string;
+  id: number;
+  question: string;
+  generated_sql: string;
+  vanna_collection_point: any;
+  is_relevant: boolean;
 }
 
 export interface IQuestion {

@@ -38,33 +38,31 @@ const chatSlice = createSlice({
     builder.addMatcher(
       chatApi.endpoints.getChatById.matchFulfilled,
       (state, action) => {
-        if (action.payload.error && !action.payload?.id) {
+        if (!action.payload?.id) {
           state.error =
             "Não foi possível carregar os dados de histórico de conversas";
-        } else if (
-          !state.chatHistory.some((chat) => chat.id !== action.payload?.id)
-        ) {
-          state.chatHistory = action.payload?.id
-            ? [
-                {
-                  id: action.payload?.id,
-                  response_type: "user",
-                  question: action.payload?.question,
-                },
-                {
-                  ...action.payload,
-                  id: action.payload?.id,
-                },
-              ]
-            : [];
+        } else {
+          state.chatHistory = [
+            {
+              id: String(action.payload?.id),
+              response_type: "user",
+              question: action.payload?.question,
+            },
+            {
+              ...action.payload,
+              id: String(action.payload?.id),
+              sql: action.payload?.generated_sql,
+              response_type: "SQL_WITH_TABLE",
+            },
+          ];
         }
       }
     );
-    // builder.addMatcher(chatApi.endpoints.getChatById.matchRejected, (state) => {
-    //   state.chatHistory = [];
-    //   state.error =
-    //     "Não foi possível carregar os dados de histórico de conversas";
-    // });
+    builder.addMatcher(chatApi.endpoints.getChatById.matchRejected, (state) => {
+      state.chatHistory = [];
+      state.error =
+        "Não foi possível carregar os dados de histórico de conversas";
+    });
   },
 });
 

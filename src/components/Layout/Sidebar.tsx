@@ -46,6 +46,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     });
   }, []);
 
+  console.log(historyQuestion);
+
   const handleReset = useCallback(() => {
     dispatch(chatApi.util.resetApiState());
     navigate("/");
@@ -171,7 +173,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
                 </div>
               ) : (
-                historyQuestion?.questions?.map((item) => (
+                historyQuestion &&
+                historyQuestion?.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => {
@@ -179,12 +182,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                       navigate(`/chat/${item.id}`);
                     }}
                     className={`w-full flex items-center gap-3 font-light p-2 rounded-md transition-all duration-300 text-gray-600 cursor-pointer ${
-                      id == item.id
+                      id == String(item?.id)
                         ? "bg-gradient-to-l from-gray-400 to-gray-500 to-40% text-white hover:bg-opacity-80"
                         : "hover:text-white hover:bg-gray-600"
                     }`}
                   >
-                    <span className="text-sm line-clamp-1 text">
+                    <span className="text-sm line-clamp-1  dark:text-gray-200">
                       {item?.question?.charAt(0).toUpperCase() +
                         item?.question?.slice(1)}
                     </span>

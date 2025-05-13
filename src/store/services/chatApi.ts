@@ -20,12 +20,12 @@ export const chatApi = createApi({
       query: () => "/",
       providesTags: ["Chat"],
     }),
-    getHistory: builder.query<IHistoryQuestion, void>({
-      query: () => "/get_question_history?",
+    getHistory: builder.query<IHistoryQuestion[], void>({
+      query: () => "/question/all",
       providesTags: ["Chat"],
     }),
-    getChatById: builder.query<Message, string>({
-      query: (id) => `load_question?id=${id}`,
+    getChatById: builder.query<IHistoryQuestion, string>({
+      query: (id) => `question/${id}`,
       providesTags: ["Chat"],
     }),
     createChat: builder.mutation<IResponseMessage, { question: string }>({
