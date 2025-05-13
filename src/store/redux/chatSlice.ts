@@ -5,11 +5,13 @@ import { chatApi } from "../services/chatApi";
 interface ChatState {
   chatHistory: Message[];
   error: string | null;
+  isLoading: boolean;
 }
 
 const initialState: ChatState = {
   chatHistory: [],
   error: null,
+  isLoading: false,
 };
 
 const chatSlice = createSlice({
@@ -38,6 +40,7 @@ const chatSlice = createSlice({
     builder.addMatcher(
       chatApi.endpoints.getChatById.matchFulfilled,
       (state, action) => {
+        state.isLoading = false;
         if (!action.payload?.id) {
           state.error =
             "Não foi possível carregar os dados de histórico de conversas";
@@ -58,8 +61,13 @@ const chatSlice = createSlice({
         }
       }
     );
+    builder.addMatcher(chatApi.endpoints.getChatById.matchPending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addMatcher(chatApi.endpoints.getChatById.matchRejected, (state) => {
       state.chatHistory = [];
+      state.isLoading = false;
       state.error =
         "Não foi possível carregar os dados de histórico de conversas";
     });
