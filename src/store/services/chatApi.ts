@@ -36,16 +36,29 @@ export const chatApi = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
-
+    questionUpdate: builder.mutation<
+      IResponseMessage,
+      {
+        id: string;
+        question: string;
+        generated_sql: string;
+        is_relevant: boolean;
+      }
+    >({
+      query: (data) => ({
+        url: `/question/${data.id}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
     relevantMessage: builder.mutation<Message, string>({
       query: (id) => ({
-        url: `/mark_question_as_relevant`,
+        url: `/question/mark_question_as_relevant`,
         method: "POST",
         body: {
           question_id: id,
         },
       }),
-      invalidatesTags: ["Chat"],
     }),
   }),
 });
@@ -59,4 +72,6 @@ export const {
   useCreateChatMutation,
   //   addMessage
   useRelevantMessageMutation,
+  //   updateSQL
+  useQuestionUpdateMutation,
 } = chatApi;

@@ -47,7 +47,7 @@ const chatSlice = createSlice({
         } else {
           state.chatHistory = [
             {
-              id: String(action.payload?.id),
+              id: crypto.randomUUID(),
               response_type: "user",
               question: action.payload?.question,
             },
@@ -56,6 +56,7 @@ const chatSlice = createSlice({
               id: String(action.payload?.id),
               sql: action.payload?.generated_sql,
               response_type: "SQL_WITH_TABLE",
+              is_correct: action.payload?.is_relevant,
             },
           ];
         }

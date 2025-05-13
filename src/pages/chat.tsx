@@ -55,7 +55,7 @@ export default function Chat() {
     const updatedHistory: Message[] = [
       ...chatHistory,
       {
-        id: "",
+        id: (chatHistory.length + 1).toString(),
         response_type: "user",
         question: currentMessage,
       },

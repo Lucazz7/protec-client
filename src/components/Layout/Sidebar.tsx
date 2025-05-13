@@ -46,8 +46,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     });
   }, []);
 
-  console.log(historyQuestion);
-
   const handleReset = useCallback(() => {
     dispatch(chatApi.util.resetApiState());
     navigate("/");

@@ -12,6 +12,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
 import { useDispatch } from "react-redux";
@@ -22,6 +23,7 @@ import { useAppSelector } from "../../store";
 import { setChatHistory, updateMessage } from "../../store/redux/chatSlice";
 import {
   chatApi,
+  useQuestionUpdateMutation,
   useRelevantMessageMutation,
 } from "../../store/services/chatApi";
 
@@ -47,6 +49,8 @@ export default function ChatView({
 
   const [relevantMessage, { isLoading: isLoadingRelevant }] =
     useRelevantMessageMutation();
+  const [updateSQL, { isLoading: isLoadingUpdate }] =
+    useQuestionUpdateMutation();
 
   const [editingSQL, setEditingSQL] = useState<number | null>(null);
   const [editedSQL, setEditedSQL] = useState("");
@@ -65,10 +69,35 @@ export default function ChatView({
     [dispatch, relevantMessage]
   );
 
-  const handleSaveSQL = (index: number) => {
-    // Aqui você pode implementar a lógica para salvar o SQL editado
-    // Por exemplo, fazer uma chamada à API para atualizar o SQL
-    setEditingSQL(null);
+  const handleSaveSQL = (id: string, question: string) => {
+    const response = updateSQL({
+      id,
+      generated_sql: editedSQL,
+      question,
+      is_relevant: true,
+    });
+
+    response.then((res) => {
+      if (res.data) {
+        dispatch(
+          setChatHistory(
+            chatHistory.map((chat) => {
+              if (chat.id === id) {
+                return {
+                  ...chat,
+                  sql: editedSQL,
+                  is_correct: true,
+                };
+              }
+              return chat;
+            })
+          )
+        );
+        setEditingSQL(null);
+      } else {
+        toast.error("Erro ao salvar o SQL");
+      }
+    });
   };
 
   useEffect(() => {
@@ -125,7 +154,10 @@ export default function ChatView({
                             type="text"
                             size="small"
                             className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-md dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
-                            onClick={() => handleSaveSQL(index)}
+                            onClick={() =>
+                              chat?.question &&
+                              handleSaveSQL(chat?.id, chat?.question)
+                            }
                           >
                             Salvar
                           </Button>
