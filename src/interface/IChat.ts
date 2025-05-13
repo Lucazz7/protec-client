@@ -13,11 +13,6 @@ export interface Message {
   sql_error?: string | null;
 }
 
-export interface IQuestion {
-  id: string;
-  question: string;
-}
-
 export interface Chat {
   id: string;
   messages: Message[];
@@ -38,11 +33,6 @@ export interface IHistoryQuestion {
   is_relevant: boolean;
 }
 
-export interface IQuestion {
-  id: string;
-  question: string;
-}
-
 export interface IResponseMessage {
   response_type: string;
   response: string;
@@ -56,25 +46,4 @@ export interface IVannaQuestion {
   is_relevant: boolean;
   id: number;
   generated_sql: string;
-}
-
-export interface IAnswer {
-  codfilial: number;
-  codreqchave: number;
-  codusucad: number;
-  datahoracad: string;
-  informacoes?: string;
-  codusulib: number;
-  datahoralib: string;
-  codaprova: string;
-  codtiporeq: number;
-  parametros: any;
-  parametros2: string;
-  obs: string;
-  datahoraalt: any;
-  datahorareplica: any;
-  justificativa: any;
-  codfilialtrans: number;
-  codtransacao: number;
-  usuliberacao: any;
 }

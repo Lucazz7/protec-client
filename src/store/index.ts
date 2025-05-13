@@ -12,7 +12,7 @@ import {
 import chatSlice from "./redux/chatSlice";
 import themeSlice from "./redux/themeSlice";
 import { chatApi } from "./services/chatApi";
-import { trainingFilesApi } from "./services/trainingFiles";
+import { trainingFilesApi } from "./services/trainingFilesApi";
 
 export const store = configureStore({
   reducer: {

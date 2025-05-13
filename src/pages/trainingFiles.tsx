@@ -1,13 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, ConfigProvider, Modal, Popconfirm, Table } from "antd";
+import { Button, ConfigProvider, Modal, Popconfirm, Switch, Table } from "antd";
 import { Cpu, Loader2, Plus, Trash, View } from "lucide-react";
+import type { ReactElement } from "react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
-
 import { z } from "zod";
+import {
+  IDataRelevantQuestions,
+  IDataTrainingFiles as IDataTrainingFilesInterface,
+} from "../interface/ITreiningFiles";
 import { useAppSelector } from "../store";
-import { useGetTrainingFilesQuery } from "../store/services/trainingFiles";
+import {
+  useGetAllDLLFilesQuery,
+  useGetAllRelevantQuestionsQuery,
+} from "../store/services/trainingFilesApi";
 
 // Schema de validação com zod
 const schema = z.object({
@@ -19,11 +26,31 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+type TableItem = DLLTableItem | QuestionTableItem;
+
+interface DLLTableItem {
+  key: number;
+  nome: string;
+  conteudo: React.ReactNode;
+  acao: ReactElement;
+}
+
+interface QuestionTableItem {
+  key: number;
+  questao: React.ReactNode;
+  conteudo: React.ReactNode;
+  acao: ReactElement;
+}
+
 export default function TrainingFiles() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewAll, setViewAll] = useState(false);
+  const [showDLLFiles, setShowDLLFiles] = useState(true);
 
-  const { data: trainingFiles, isLoading } = useGetTrainingFilesQuery();
+  const { data: allFilesDLL, isLoading: isLoadingDLL } =
+    useGetAllDLLFilesQuery();
+  const { data: allRelevantQuestions, isLoading: isLoadingQuestions } =
+    useGetAllRelevantQuestionsQuery();
 
   const theme = useAppSelector((state) => state.themeSlice.theme);
 
@@ -44,34 +71,146 @@ export default function TrainingFiles() {
     setIsModalOpen(false);
   };
 
-  // Função para transformar os dados da API no formato da tabela
-  const getTableData = useMemo(() => {
-    if (!trainingFiles?.df) return [];
+  // Função para transformar os dados da DLL no formato da tabela
+  const getDLLTableData = useMemo<DLLTableItem[]>(() => {
+    if (!allFilesDLL) return [];
 
-    const parsedData = JSON.parse(trainingFiles.df);
+    return allFilesDLL.map(
+      (item: IDataTrainingFilesInterface, index: number) => ({
+        key: index,
+        nome: item.table_name || "Sem nome",
+        conteudo: (
+          <div className="flex flex-col gap-2  items-center justify-cente max-h-72 overflow-hidden">
+            <pre className="bg-gray-100 dark:bg-[#161515c5] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
+              <ReactMarkdown>
+                {(item?.commented_ddl || "").toString()}
+              </ReactMarkdown>
+            </pre>
+          </div>
+        ),
+        tipoDado: (
+          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden">
+            <p className="text-center text-sm ">DDL</p>
+          </div>
+        ),
+        acao: (
+          <Popconfirm
+            title="Remover"
+            description="Tem certeza que deseja remover este arquivo DLL?"
+            onConfirm={() => {}}
+            okText="Sim"
+            cancelText="Não"
+          >
+            <Button className="w-auto !rounded-full !border-red-500 !text-red-500 hover:!bg-red-500 hover:!text-white">
+              <Trash size={16} />
+              Remover
+            </Button>
+          </Popconfirm>
+        ),
+      })
+    );
+  }, [allFilesDLL]);
 
-    return parsedData.map((item: any, index: number) => ({
-      key: index,
-      acao: <div className="min-w-[140px]"></div>,
-      questao: (
-        <div className="min-w-[140px] max-w-[300px]">
-          {item?.question || "Não há questão"}
-        </div>
-      ),
-      conteudo: (
-        <div className="flex flex-col gap-2 max-h-72 overflow-hidden max-w-[600px]">
-          <pre className="bg-gray-100 dark:bg-[#161515c5] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
-            <ReactMarkdown>{item.content}</ReactMarkdown>
-          </pre>
-        </div>
-      ),
-      tipo: (
-        <div className="flex items-center gap-2 justify-center min-w-[140px]">
-          {item.training_data_type.toUpperCase()}
-        </div>
-      ),
-    }));
-  }, [trainingFiles]);
+  const getQuestionsTableData = useMemo<QuestionTableItem[]>(() => {
+    if (!allRelevantQuestions) return [];
+
+    return allRelevantQuestions.map(
+      (item: IDataRelevantQuestions, index: number) => ({
+        key: index,
+        questao: (
+          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden">
+            <p className=" text-sm ">{(item?.question || "").toString()}</p>
+          </div>
+        ),
+        conteudo: (
+          <div className="w-full flex items-center justify-center flex-col gap-2 max-h-72 overflow-hidden">
+            <pre className="bg-gray-100 dark:bg-[#161515c5] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
+              <ReactMarkdown>
+                {(item?.generated_sql || "").toString()}
+              </ReactMarkdown>
+            </pre>
+          </div>
+        ),
+        tipoDado: (
+          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden">
+            <p className="text-center text-sm ">SQL/Documentação</p>
+          </div>
+        ),
+        acao: (
+          <div className="w-full flex justify-center items-center">
+            <Popconfirm
+              title="Remover"
+              description="Tem certeza que deseja remover esta questão?"
+              onConfirm={() => {}}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button className=" w-fit !rounded-full !border-red-500 !text-red-500 hover:!bg-red-500 hover:!text-white">
+                <Trash size={16} />
+                Remover
+              </Button>
+            </Popconfirm>
+          </div>
+        ),
+      })
+    );
+  }, [allRelevantQuestions]);
+
+  const dllColumns = [
+    {
+      title: <div className="text-center text-sm  ">Nome do Arquivo</div>,
+      dataIndex: "nome",
+      key: "nome",
+      width: "20%",
+    },
+
+    {
+      title: <div className="text-center text-sm  ">Conteúdo</div>,
+      dataIndex: "conteudo",
+      width: "40%",
+      key: "conteudo",
+    },
+    {
+      title: <div className="text-center text-sm  ">Tipo de Dado</div>,
+      dataIndex: "tipoDado",
+      key: "tipoDado",
+      width: "20%",
+    },
+    {
+      title: <div className="text-center text-sm  ">Ação</div>,
+      dataIndex: "acao",
+      align: "center",
+      key: "acao",
+      width: "20%",
+    },
+  ];
+
+  const questionsColumns = [
+    {
+      title: <div className="text-center text-sm  ">Questão</div>,
+      dataIndex: "questao",
+      key: "questao",
+      width: "20%",
+    },
+    {
+      title: <div className="text-center text-sm  ">Conteúdo</div>,
+      dataIndex: "conteudo",
+      key: "conteudo",
+      width: "40%",
+    },
+    {
+      title: <div className="text-center text-sm  ">Tipo de Dado</div>,
+      dataIndex: "tipoDado",
+      key: "tipoDado",
+      width: "20%",
+    },
+    {
+      title: <div className="text-center text-sm  ">Ação</div>,
+      dataIndex: "acao",
+      key: "acao",
+      width: "20%",
+    },
+  ];
 
   // Função para adicionar novo item
   const onSubmit = (data: FormData) => {
@@ -79,77 +218,34 @@ export default function TrainingFiles() {
     reset();
   };
 
-  // Atualize as colunas para usar a função de remover
-  const columns = [
-    {
-      title: (
-        <div className="min-w-20 md:min-w-[140px] flex items-center gap-2 justify-center">
-          Tipo de Dado
-        </div>
-      ),
-      dataIndex: "tipo",
-      key: "tipo",
-    },
-    {
-      title: (
-        <div className="max-w-[300px]  flex items-center gap-2 justify-center">
-          Questão
-        </div>
-      ),
-      dataIndex: "questao",
-      key: "questao",
-    },
-    {
-      title: (
-        <div className="w-full flex items-center gap-2 justify-center">
-          Conteúdo
-        </div>
-      ),
-      dataIndex: "conteudo",
-      key: "conteudo",
-    },
-    {
-      title: (
-        <div className="min-w-[140px] flex items-center gap-2 justify-center">
-          Ação
-        </div>
-      ),
-      dataIndex: "key",
-      key: "acao",
-      render: (key: number) => (
-        <Popconfirm
-          title="Remover"
-          description="Tem certeza que deseja remover este dado de treinamento?"
-          onConfirm={() => {}}
-          okText="Sim"
-          cancelText="Não"
-        >
-          <Button className="w-auto !rounded-full !border-red-500 !text-red-500 hover:!bg-red-500 hover:!text-white">
-            <Trash size={16} />
-            Remover
-          </Button>
-        </Popconfirm>
-      ),
-    },
-  ];
-
   return (
     <div className="w-full h-full mx-auto flex flex-col overflow-hidden">
       <div className="w-full p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
         <span className="w-full md:w-auto text-base text-gray-500 dark:text-gray-300 flex items-center gap-2">
           <Cpu size={22} /> Arquivos de Treinamento
         </span>
-        <div className="w-full md:w-auto flex justify-end items-center gap-2">
+        <div className="w-full md:w-auto flex justify-end items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500 dark:text-gray-300">
+              Arquivos DLL
+            </span>
+            <Switch
+              checked={!showDLLFiles}
+              onChange={(checked) => setShowDLLFiles(!checked)}
+            />
+            <span className="text-gray-500 dark:text-gray-300">
+              SQL/Documentação
+            </span>
+          </div>
           <Button
-            className=" !text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+            className="!text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
             onClick={() => setViewAll(!viewAll)}
-            disabled={getTableData.length <= 10}
           >
             <View size={16} />
-            {viewAll && getTableData.length > 10 ? "Ver menos" : "Ver todos"}
+            {viewAll ? "Ver menos" : "Ver todos"}
           </Button>
           <Button
-            className=" !text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+            className="!text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
             onClick={() => setIsModalOpen(true)}
           >
             <Plus size={16} />
@@ -157,14 +253,14 @@ export default function TrainingFiles() {
           </Button>
         </div>
       </div>
-      <div className="w-full h-full p-4">
-        <div className="w-full  rounded-lg h-full dark:text-gray-200 dark:border-gray-700">
-          {isLoading ? (
+      <div className="w-full h-full ">
+        <div className="w-full rounded-lg h-full dark:text-gray-200 dark:border-gray-700">
+          {isLoadingDLL || isLoadingQuestions ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 size={24} className="animate-spin" />
             </div>
-          ) : getTableData.length > 0 ? (
-            <div className="w-full h-full bg-white dark:bg-[#101828]">
+          ) : (
+            <div className="w-full h-full bg-white dark:bg-[#101828] rounded-lg">
               <ConfigProvider
                 theme={
                   theme
@@ -192,20 +288,19 @@ export default function TrainingFiles() {
                     : undefined
                 }
               >
-                <Table
+                <Table<TableItem>
                   className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
                   bordered={false}
-                  dataSource={getTableData}
-                  columns={columns}
+                  dataSource={
+                    showDLLFiles ? getDLLTableData : getQuestionsTableData
+                  }
+                  columns={showDLLFiles ? dllColumns : questionsColumns}
                   scroll={{
                     x: true,
-                    y:
-                      !viewAll && getTableData.length < 10
-                        ? "calc(100vh - 220px)"
-                        : "calc(100vh - 260px)",
+                    y: "calc(100vh - 260px)",
                   }}
                   pagination={
-                    !viewAll && getTableData.length > 10
+                    !viewAll
                       ? {
                           pageSize: 10,
                           position: ["bottomCenter"],
@@ -214,27 +309,6 @@ export default function TrainingFiles() {
                   }
                 />
               </ConfigProvider>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full relative gap-4">
-              <div className="flex flex-col items-center justify-center">
-                <img
-                  src="/image/No data-bro.png"
-                  alt="empty"
-                  className="w-full max-h-[450px]"
-                />
-                <span className="px-4 md:px-0 text-center text-sm md:text-base text-gray-400 dark:text-gray-300 py-4">
-                  Nenhum dado de treinamento encontrado, deseja adicionar clique
-                  no botão abaixo.
-                </span>
-                <Button
-                  className="!text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  <Plus size={16} />
-                  Adicionar
-                </Button>
-              </div>
             </div>
           )}
         </div>

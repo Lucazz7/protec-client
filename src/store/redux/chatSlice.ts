@@ -56,7 +56,8 @@ const chatSlice = createSlice({
               id: String(action.payload?.id),
               sql: action.payload?.generated_sql,
               response_type: "SQL_WITH_TABLE",
-              is_correct: action.payload?.is_relevant,
+              is_correct:
+                action.payload?.is_relevant === true ? true : undefined,
             },
           ];
         }

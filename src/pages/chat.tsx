@@ -127,7 +127,7 @@ export default function Chat() {
     });
   }, [chatHistory, chatMessage, createChat, dispatch, navigate]);
 
-  const loading = isCreating || isLoadingChat || isLoading;
+  const loading = isLoadingChat || isLoading;
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -212,7 +212,7 @@ export default function Chat() {
               >
                 <ChatView
                   chatHistory={chatHistory}
-                  isLoading={loading}
+                  isLoading={isCreating || isLoadingChat}
                   error={error}
                 />
               </div>

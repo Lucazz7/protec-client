@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setChatHistory } from "../../store/redux/chatSlice";
-import { chatApi } from "../../store/services/chatApi";
 
 export default function HeaderChatView({
   setMessage,
@@ -15,10 +14,10 @@ export default function HeaderChatView({
   const dispatch = useDispatch();
 
   const handleReset = useCallback(() => {
-    dispatch(chatApi.util.resetApiState());
     navigate("/");
     dispatch(setChatHistory([]));
     setMessage("");
+    // dispatch(chatApi.util.resetApiState());
   }, [dispatch, navigate, setMessage]);
 
   return (

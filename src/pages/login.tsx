@@ -8,7 +8,6 @@ import AnimationLogin from "../components/AnimationLogin";
 import LoginForm from "../components/forms/LoginForm";
 import RegisterForm from "../components/forms/RegisterForm";
 import ResetPasswordForm from "../components/forms/ResetPasswordForm";
-import SwitchLoginOrRegister from "../components/SwitchLoginOrRegister";
 import SwitchTheme from "../components/SwitchTheme";
 
 export default function Login() {
@@ -25,7 +24,7 @@ export default function Login() {
     <div className="w-full h-dvh flex font-inter ">
       <div
         className={`w-full h-full flex transition-all duration-300 ease-linear transform relative overflow-y-auto ${
-          resetPasswordOrRegister === "register"
+          resetPasswordOrRegister !== "register"
             ? "flex-row-reverse"
             : "flex-row"
         } bg-white dark:bg-gray-900 p-4`}
@@ -51,9 +50,9 @@ export default function Login() {
           </div>
 
           <div className="w-full my-auto h-fit md:max-w-lg lg:max-w-md xl:max-w-xl  flex flex-col items-center md:px-10 min-h-[550px] relative">
-            {resetPasswordOrRegister !== "reset-password" && (
+            {/* {resetPasswordOrRegister !== "reset-password" && (
               <SwitchLoginOrRegister />
-            )}
+            )} */}
             <div className="flex flex-col items-center justify-center gap-2 my-3 md:my-6">
               <div className="w-full h-full flex relative items-center justify-center ">
                 <span className="text-4xl sm:text-7xl font-semibold text-gray-600 dark:text-blue-200">

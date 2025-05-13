@@ -2,7 +2,7 @@ import { Database, History, LogOut, Menu, Plus, User, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { setChatHistory } from "../../store/redux/chatSlice";
-import { chatApi, useGetHistoryQuery } from "../../store/services/chatApi";
+import { useGetHistoryQuery } from "../../store/services/chatApi";
 const listMenu = [
   {
     name: "Nova conversa",
@@ -47,9 +47,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   }, []);
 
   const handleReset = useCallback(() => {
-    dispatch(chatApi.util.resetApiState());
     navigate("/");
     dispatch(setChatHistory([]));
+    // dispatch(chatApi.util.resetApiState());
   }, [dispatch, navigate]);
 
   return (
@@ -176,8 +176,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   <div
                     key={item.id}
                     onClick={() => {
-                      dispatch(setChatHistory([]));
-                      navigate(`/chat/${item.id}`);
+                      if (Number(id) !== item.id) {
+                        dispatch(setChatHistory([]));
+                        navigate(`/chat/${item.id}`);
+                      }
                     }}
                     className={`w-full flex items-center gap-3 font-light p-2 rounded-md transition-all duration-300 text-gray-600 cursor-pointer ${
                       id == String(item?.id)

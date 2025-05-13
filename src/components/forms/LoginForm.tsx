@@ -134,7 +134,7 @@ export default function LoginForm() {
           </Button>
         </div>
       </form>
-      <div className="w-full flex justify-center items-center gap-2 text-xs sm:text-base my-6">
+      {/* <div className="w-full flex justify-center items-center gap-2 text-xs sm:text-base my-6">
         <span className="text-gray-500">
           Não tem uma conta?{" "}
           <a
@@ -145,7 +145,7 @@ export default function LoginForm() {
             Registre-se
           </a>
         </span>
-      </div>
+      </div> */}
     </>
   );
 }

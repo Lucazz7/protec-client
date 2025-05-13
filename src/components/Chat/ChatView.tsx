@@ -3,6 +3,7 @@ import { Button, ConfigProvider, Table } from "antd";
 import Aos from "aos";
 import {
   AlertCircle,
+  Check,
   CheckCircle,
   Download,
   Loader2,
@@ -10,6 +11,7 @@ import {
   RefreshCcwDot,
   ThumbsDown,
   ThumbsUp,
+  X,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -24,7 +26,6 @@ import { setChatHistory, updateMessage } from "../../store/redux/chatSlice";
 import {
   chatApi,
   useQuestionUpdateMutation,
-  useRelevantMessageMutation,
 } from "../../store/services/chatApi";
 
 interface ChatViewProps {
@@ -47,8 +48,6 @@ export default function ChatView({
     };
   });
 
-  const [relevantMessage, { isLoading: isLoadingRelevant }] =
-    useRelevantMessageMutation();
   const [updateSQL, { isLoading: isLoadingUpdate }] =
     useQuestionUpdateMutation();
 
@@ -57,16 +56,62 @@ export default function ChatView({
   const [showEditPrompt, setShowEditPrompt] = useState<number | null>(null);
 
   const handleRelevantMessage = useCallback(
-    (id: string, index: number, isCorrect: boolean) => {
-      relevantMessage(id);
-      dispatch(
-        updateMessage({
-          position: index,
-          is_correct: isCorrect,
-        })
-      );
+    (id: string, index: number, isCorrect: boolean, question: string) => {
+      //Todo: Solução temporária para Atualiza o estado do botão se esta correto ou nao
+
+      if (chatHistory && chatHistory[index]?.sql) {
+        const response = updateSQL({
+          id,
+          generated_sql: chatHistory[index]?.sql || "",
+          question,
+          is_relevant: isCorrect,
+        });
+
+        response.then((res) => {
+          if (res.data) {
+            dispatch(
+              updateMessage({
+                position: index,
+                is_correct: isCorrect,
+              })
+            );
+            dispatch(
+              setChatHistory(
+                chatHistory.map((chat) => {
+                  if (chat.id === id) {
+                    return {
+                      ...chat,
+                      is_correct: isCorrect,
+                    };
+                  }
+                  return chat;
+                })
+              )
+            );
+            setEditingSQL(null);
+          } else {
+            toast.error("Erro ao atualizar o feedback!");
+          }
+        });
+      }
+
+      //Todo: Quando estive funcionando /question/mark_as_relevant usar essa aqui
+
+      // const response = relevantMessage(id);
+
+      // response.then((res) => {
+      //   if (res.data) {
+      //     dispatch(
+      //       updateMessage({
+      //         position: index,
+      //         is_correct: isCorrect,
+      //       })
+      //     );
+      //   }
+      //   toast.error("Erro ao enviar feedback");
+      // });
     },
-    [dispatch, relevantMessage]
+    [chatHistory, dispatch, updateSQL]
   );
 
   const handleSaveSQL = (id: string, question: string) => {
@@ -149,32 +194,36 @@ export default function ChatView({
                     <div className="font-mono text-xs text-gray-700 dark:text-gray-300 mt-2 flex justify-between items-center">
                       <span>SQL:</span>
                       {editingSQL === index && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 ms-auto">
                           <Button
-                            type="text"
                             size="small"
-                            className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-md dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+                            className="!px-4 !font-mono !text-gray-700 text-sm dark:!text-gray-300 !border-green-500 !bg-green-50 dark:!bg-transparent dark:!border-gray-500 !rounded-xl !flex !items-center !justify-center gap-1 !py-3 hover:opacity-65"
                             onClick={() =>
                               chat?.question &&
                               handleSaveSQL(chat?.id, chat?.question)
                             }
                           >
-                            Salvar
+                            <Check size={16} className="text-green-500" />
+                            <span>Salvar</span>
                           </Button>
                           <Button
                             type="text"
                             size="small"
-                            className=" !text-gray-500 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-md dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
-                            onClick={() => setEditingSQL(null)}
+                            className="!px-3 !font-mono !text-gray-700 !border-red-500 !bg-red-50 dark:!text-gray-200 w-auto dark:!bg-transparent dark:!border-gray-500 !rounded-xl !flex !items-center !justify-center gap-1 !py-3 hover:opacity-65"
+                            onClick={() => {
+                              setEditingSQL(null);
+                              setShowEditPrompt(null);
+                            }}
                           >
-                            Cancelar
+                            <X size={16} className="text-red-500" />
+                            <span>Cancelar</span>
                           </Button>
                         </div>
                       )}
                     </div>
                     {editingSQL === index ? (
                       <div className="w-full flex flex-col gap-2">
-                        <pre className="bg-gray-100 dark:bg-[#10182898] shadow-sm rounded text-xs overflow-x-auto ">
+                        <pre className="bg-gray-100 dark:bg-[#10182898] shadow-sm rounded-xl text-xs overflow-x-auto ">
                           <TextareaAutosize
                             className="w-full p-2 px-5 text-gray-700 dark:text-gray-300 "
                             value={editedSQL}
@@ -196,12 +245,19 @@ export default function ChatView({
                             ? "!text-blue-400"
                             : "!text-gray-400 dark:!text-gray-300"
                         }`}
-                        disabled={isLoadingRelevant}
+                        disabled={isLoadingUpdate}
                         onClick={() => {
-                          handleRelevantMessage(chat.id, index, true);
+                          if (chat.question) {
+                            handleRelevantMessage(
+                              chat.id,
+                              index,
+                              true,
+                              chat.question
+                            );
+                          }
                         }}
                       >
-                        {isLoadingRelevant ? (
+                        {isLoadingUpdate ? (
                           <Loader2 className="animate-spin" size={16} />
                         ) : (
                           <ThumbsUp size={16} className="hover:scale-110" />
@@ -211,14 +267,21 @@ export default function ChatView({
                       <Button
                         type="text"
                         size="small"
-                        disabled={isLoadingRelevant}
+                        disabled={isLoadingUpdate}
                         className={`flex items-center gap-1 hover:scale-110 hover:!bg-white dark:hover:!bg-gray-900 dark:hover:!brightness-125 !rounded-md ${
                           chat.is_correct === false
                             ? "!text-red-500 dark:!text-red-500"
                             : "!text-gray-400 dark:!text-gray-300"
                         }`}
                         onClick={() => {
-                          handleRelevantMessage(chat.id, index, false);
+                          if (chat.question) {
+                            handleRelevantMessage(
+                              chat.id,
+                              index,
+                              false,
+                              chat?.question
+                            );
+                          }
                           setShowEditPrompt(index);
                         }}
                       >
@@ -226,6 +289,7 @@ export default function ChatView({
                         <span>Incorreto</span>
                       </Button>
                     </div>
+
                     {chat.is_correct === false &&
                       showEditPrompt === index &&
                       !editingSQL && (

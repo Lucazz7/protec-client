@@ -56,7 +56,7 @@ export const chatApi = createApi({
         url: `/question/mark_question_as_relevant`,
         method: "POST",
         body: {
-          question_id: id,
+          question_id: Number(id),
         },
       }),
     }),
