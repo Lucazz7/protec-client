@@ -3,6 +3,7 @@ const API_URL = "http://167.234.225.105:6543/";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
+  IDataCreateTrainingFile,
   IDataRelevantQuestions,
   IDataTrainingFiles,
 } from "../../interface/ITreiningFiles";
@@ -20,8 +21,30 @@ export const trainingFilesApi = createApi({
       query: () => "/relevant_questions/",
       providesTags: ["TrainingFiles"],
     }),
+    createTrainingFile: builder.mutation<void, IDataCreateTrainingFile>({
+      query: (data) => ({
+        url: "/ddl",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["TrainingFiles"],
+    }),
+    deleteTrainingFile: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/ddl/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TrainingFiles"],
+    }),
   }),
 });
 
-export const { useGetAllDLLFilesQuery, useGetAllRelevantQuestionsQuery } =
-  trainingFilesApi;
+export const {
+  //Get
+  useGetAllDLLFilesQuery,
+  useGetAllRelevantQuestionsQuery,
+  //Post
+  useCreateTrainingFileMutation,
+  //Delete
+  useDeleteTrainingFileMutation,
+} = trainingFilesApi;

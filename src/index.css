@@ -203,4 +203,19 @@ input:-webkit-autofill {
   animation: gradientMove 6s ease-in-out infinite;
 }
 
+.dark .ant-popover-content {
+  border-radius: 10px !important;
+  background-color: #101828 !important;
+}
+
+
+.dark .ant-popover-inner {
+  border-radius: 10px !important;
+  border: 1px solid #364153 !important;
+  background-color: #101828 !important;
+}
+
+.ant-popover-arrow {
+  color: #101828 !important;
+}
 

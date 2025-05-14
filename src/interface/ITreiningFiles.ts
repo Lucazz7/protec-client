@@ -12,3 +12,9 @@ export interface IDataRelevantQuestions {
   vanna_collection_point: string;
   is_relevant: boolean;
 }
+
+export interface IDataCreateTrainingFile {
+  table_name?: string;
+  origin_type: string;
+  ddl: string;
+}

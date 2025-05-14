@@ -165,7 +165,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 <SwitchTheme />
               </div>
             </div>
-            <div className="w-full flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2 gap-1">
+            <div className="w-full my-auto flex flex-col h-full md:max-h-[55lvh] overflow-y-auto font-inter p-2 gap-1">
               {isLoadingHistory || isFetchingHistory ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
