@@ -1,6 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, ConfigProvider, Modal, Popconfirm, Switch, Table } from "antd";
-import { Cpu, Loader2, Plus, Trash, View } from "lucide-react";
+import {
+  Button,
+  ConfigProvider,
+  Modal,
+  Pagination,
+  Popconfirm,
+  Switch,
+  Table,
+} from "antd";
+import { Cpu, Database, File, Plus, Trash } from "lucide-react";
 import type { ReactElement } from "react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -30,7 +38,7 @@ type TableItem = DLLTableItem | QuestionTableItem;
 
 interface DLLTableItem {
   key: number;
-  nome: string;
+  nome: React.ReactNode;
   conteudo: React.ReactNode;
   acao: ReactElement;
 }
@@ -46,6 +54,8 @@ export default function TrainingFiles() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [showDLLFiles, setShowDLLFiles] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const { data: allFilesDLL, isLoading: isLoadingDLL } =
     useGetAllDLLFilesQuery();
@@ -78,9 +88,15 @@ export default function TrainingFiles() {
     return allFilesDLL.map(
       (item: IDataTrainingFilesInterface, index: number) => ({
         key: index,
-        nome: item.table_name || "Sem nome",
+        nome: (
+          <div className="w-full flex justify-center items-center flex-col gap-2 overflow-hidden min-w-[160px]">
+            <p className="text-center text-sm ">
+              {item.table_name || "Sem nome"}
+            </p>
+          </div>
+        ),
         conteudo: (
-          <div className="flex flex-col gap-2  items-center justify-cente max-h-72 overflow-hidden">
+          <div className="w-full flex flex-col gap-2 max-h-72 overflow-auto max-w-[550px]">
             <pre className="bg-gray-100 dark:bg-[#161515c5] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
               <ReactMarkdown>
                 {(item?.commented_ddl || "").toString()}
@@ -89,23 +105,25 @@ export default function TrainingFiles() {
           </div>
         ),
         tipoDado: (
-          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden">
-            <p className="text-center text-sm ">DDL</p>
+          <div className="w-full flex justify-center items-center flex-col gap-2 min-w-[100px] overflow-hidden">
+            <p className="text-center text-sm ">DLL</p>
           </div>
         ),
         acao: (
-          <Popconfirm
-            title="Remover"
-            description="Tem certeza que deseja remover este arquivo DLL?"
-            onConfirm={() => {}}
-            okText="Sim"
-            cancelText="Não"
-          >
-            <Button className="w-auto !rounded-full !border-red-500 !text-red-500 hover:!bg-red-500 hover:!text-white">
-              <Trash size={16} />
-              Remover
-            </Button>
-          </Popconfirm>
+          <div className="w-full flex justify-center items-center">
+            <Popconfirm
+              title="Remover"
+              description="Tem certeza que deseja remover esta questão?"
+              onConfirm={() => {}}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button className=" w-fit !rounded-full !border-red-500 !text-red-500 hover:!bg-red-500 hover:!text-white">
+                <Trash size={16} />
+                Remover
+              </Button>
+            </Popconfirm>
+          </div>
         ),
       })
     );
@@ -118,12 +136,12 @@ export default function TrainingFiles() {
       (item: IDataRelevantQuestions, index: number) => ({
         key: index,
         questao: (
-          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden">
-            <p className=" text-sm ">{(item?.question || "").toString()}</p>
+          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden min-w-[160px]">
+            <p className="text-sm ">{(item?.question || "").toString()}</p>
           </div>
         ),
         conteudo: (
-          <div className="w-full flex items-center justify-center flex-col gap-2 max-h-72 overflow-hidden">
+          <div className="w-full flex flex-col gap-2 max-h-72 overflow-auto max-w-[550px]">
             <pre className="bg-gray-100 dark:bg-[#161515c5] p-2 shadow-sm rounded text-xs overflow-x-auto w-fit px-5 flex flex-col ">
               <ReactMarkdown>
                 {(item?.generated_sql || "").toString()}
@@ -132,8 +150,10 @@ export default function TrainingFiles() {
           </div>
         ),
         tipoDado: (
-          <div className="w-full flex justify-center items-center flex-col gap-2  overflow-hidden">
-            <p className="text-center text-sm ">SQL/Documentação</p>
+          <div className="w-full flex justify-center items-center flex-col gap-2 min-w-[100px] overflow-hidden">
+            <p className="text-center text-sm ">
+              {item.generated_sql ? "SQL" : "Documentação"}
+            </p>
           </div>
         ),
         acao: (
@@ -158,56 +178,67 @@ export default function TrainingFiles() {
 
   const dllColumns = [
     {
-      title: <div className="text-center text-sm  ">Nome do Arquivo</div>,
+      title: "Nome do Arquivo",
       dataIndex: "nome",
       key: "nome",
+      classNameCustom: "w-[120px] md:w-[20%]",
       width: "20%",
     },
 
     {
-      title: <div className="text-center text-sm  ">Conteúdo</div>,
+      title: "Conteúdo",
       dataIndex: "conteudo",
-      width: "40%",
       key: "conteudo",
+      classNameCustom:
+        " border-l border-gray-200 dark:border-gray-700 w-[80px] md:w-[39.8%] ",
+      width: "40%",
     },
     {
-      title: <div className="text-center text-sm  ">Tipo de Dado</div>,
+      title: "Tipo de Dado",
       dataIndex: "tipoDado",
       key: "tipoDado",
+      classNameCustom:
+        "border-l border-gray-200 dark:border-gray-700 w-[120px] md:w-[20%] ",
       width: "20%",
     },
     {
-      title: <div className="text-center text-sm  ">Ação</div>,
+      title: "Ação",
       dataIndex: "acao",
-      align: "center",
       key: "acao",
+      classNameCustom: "w-[20%] border-l border-gray-200 dark:border-gray-700 ",
       width: "20%",
     },
   ];
 
   const questionsColumns = [
     {
-      title: <div className="text-center text-sm  ">Questão</div>,
+      title: "Questão",
       dataIndex: "questao",
       key: "questao",
+      classNameCustom:
+        "w-[20%] border-l border-gray-200 dark:border-gray-700 min-w-[90px]",
       width: "20%",
     },
     {
-      title: <div className="text-center text-sm  ">Conteúdo</div>,
+      title: "Conteúdo",
       dataIndex: "conteudo",
       key: "conteudo",
+      classNameCustom: "w-[40%] border-l border-gray-200 dark:border-gray-700",
       width: "40%",
     },
     {
-      title: <div className="text-center text-sm  ">Tipo de Dado</div>,
+      title: "Tipo de Dado",
       dataIndex: "tipoDado",
       key: "tipoDado",
+      classNameCustom:
+        "w-[20%] border-l border-gray-200 dark:border-gray-700 min-w-[110px]",
       width: "20%",
     },
     {
-      title: <div className="text-center text-sm  ">Ação</div>,
+      title: "Ação",
       dataIndex: "acao",
       key: "acao",
+      classNameCustom: "w-[20%] border-l border-gray-200 dark:border-gray-700",
       width: "20%",
     },
   ];
@@ -218,99 +249,146 @@ export default function TrainingFiles() {
     reset();
   };
 
+  // Adicione esta função para calcular os dados paginados
+  const getPaginatedData = (data: TableItem[]) => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return data.slice(startIndex, endIndex);
+  };
+
   return (
     <div className="w-full h-full mx-auto flex flex-col overflow-hidden">
       <div className="w-full p-4 flex flex-col md:flex-row justify-between items-center gap-4 rounded-t-2xl relative shadow-sm">
-        <span className="w-full md:w-auto text-base text-gray-500 dark:text-gray-300 flex items-center gap-2">
-          <Cpu size={22} /> Arquivos de Treinamento
-        </span>
-        <div className="w-full md:w-auto flex justify-end items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-500 dark:text-gray-300">
-              Arquivos DLL
-            </span>
-            <Switch
-              checked={!showDLLFiles}
-              onChange={(checked) => setShowDLLFiles(!checked)}
-            />
-            <span className="text-gray-500 dark:text-gray-300">
-              SQL/Documentação
-            </span>
-          </div>
+        <div className="w-full md:w-auto text-sm min-[400px]:text-base text-gray-500 dark:text-gray-300 flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2">
+            <Cpu size={22} /> Arquivos de Treinamento
+          </span>
+
           <Button
-            className="!text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
-            onClick={() => setViewAll(!viewAll)}
-          >
-            <View size={16} />
-            {viewAll ? "Ver menos" : "Ver todos"}
-          </Button>
-          <Button
-            className="!text-gray-500 w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+            className="!text-gray-500  md:!hidden w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
             onClick={() => setIsModalOpen(true)}
           >
             <Plus size={16} />
             Adicionar
           </Button>
         </div>
+        <div className="w-full items-center justify-center  md:w-auto flex gap-2 !text-sm min-[400px]:text-base text-gray-500 dark:text-gray-300">
+          <span className="flex items-center gap-2">
+            <File size={16} /> Arquivos DLL
+          </span>
+          <Switch
+            checked={!showDLLFiles}
+            className="!bg-gray-500 dark:!bg-gray-300"
+            onChange={(checked) => setShowDLLFiles(!checked)}
+          />
+          <span className="flex items-center gap-2">
+            SQL/Documentação <Database size={16} />
+          </span>
+        </div>
+
+        <Button
+          className="!text-gray-500  md:!flex !hidden w-auto dark:!bg-transparent dark:!border-gray-500 dark:!text-gray-300 !rounded-full dark:hover:!bg-gray-900 dark:hover:!brightness-125 hover:!border-gray-500"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <Plus size={16} />
+          Adicionar
+        </Button>
       </div>
-      <div className="w-full h-full ">
-        <div className="w-full rounded-lg h-full dark:text-gray-200 dark:border-gray-700">
-          {isLoadingDLL || isLoadingQuestions ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 size={24} className="animate-spin" />
-            </div>
-          ) : (
-            <div className="w-full h-full bg-white dark:bg-[#101828] rounded-lg">
-              <ConfigProvider
-                theme={
-                  theme
-                    ? {
-                        token: {
-                          colorPrimary: "#e5e7eb",
-                          colorText: "#e5e7eb",
-                          colorBorder: "#364153",
-                          colorBgContainer: "#101828",
+      <div className="w-full flex-1 flex flex-col min-h-0">
+        <div className="w-full h-full flex-1 flex flex-col min-h-0">
+          <div className="w-full h-full bg-white dark:bg-[#101828] overflow-hidden rounded-lg min-h-0">
+            <ConfigProvider
+              theme={
+                theme
+                  ? {
+                      token: {
+                        colorPrimary: "#e5e7eb",
+                        colorText: "#e5e7eb",
+                        colorBorder: "#364153",
+                        colorBgContainer: "#101828",
+                      },
+                      components: {
+                        Table: {
+                          headerBg: "#101828",
+                          headerColor: "#e5e7eb",
+                          stickyScrollBarBg: "#031842c5",
+                          stickyScrollBarBorderRadius: 4,
+                          borderColor: "#364153",
+                          headerSplitColor: "#364153",
                         },
-                        components: {
-                          Table: {
-                            headerBg: "#101828",
-                            headerColor: "#e5e7eb",
-                            stickyScrollBarBg: "#031842c5",
-                            stickyScrollBarBorderRadius: 4,
-                            borderColor: "#364153",
-                            headerSplitColor: "#364153",
-                          },
-                          Pagination: {
-                            colorBgContainer: "#101828a2",
-                          },
+                        Pagination: {
+                          colorBgContainer: "#101828a2",
                         },
+                      },
+                    }
+                  : undefined
+              }
+            >
+              {/* Header fixo */}
+              <div className="w-full h-12 md:h-16 bg-[#f5f5f5] dark:bg-[#0e0e18] border-b border-gray-200 dark:border-gray-700 flex !rounded-t-lg text-sm md:text-base ">
+                {showDLLFiles
+                  ? dllColumns.map((col, index) => (
+                      <span
+                        key={index}
+                        className={`flex justify-center items-center text-gray-500 font-semibold dark:text-gray-200 py-4 ${col.classNameCustom} px-2 text-center text-xs md:text-base`}
+                      >
+                        {col.title}
+                      </span>
+                    ))
+                  : questionsColumns.map((col, index) => (
+                      <div
+                        key={index}
+                        className={`flex justify-center items-center  text-gray-500 font-semibold dark:text-gray-200 py-4 ${col.classNameCustom} text-center`}
+                      >
+                        {col.title}
+                      </div>
+                    ))}
+              </div>
+
+              {/* Tabela com dados paginados */}
+              <Table<TableItem>
+                className="w-full h-[calc(100%-120px)] md:h-[calc(100%-128px)] overflow-auto !bg-transparent rounded-lg"
+                bordered={true}
+                dataSource={getPaginatedData(
+                  showDLLFiles ? getDLLTableData : getQuestionsTableData
+                )}
+                columns={showDLLFiles ? dllColumns : questionsColumns}
+                scroll={{ x: "100%" }}
+                pagination={false}
+                showHeader={false}
+                loading={showDLLFiles ? isLoadingDLL : isLoadingQuestions}
+              />
+
+              {/* Paginação fixa */}
+              {!viewAll && (
+                <div className="w-full h-12 md:h-16 bg-white dark:bg-[#101828] border-t border-gray-200 dark:border-gray-700 p-4 shadow-sm rounded-b-2xl">
+                  <div className="w-full h-full flex justify-center">
+                    <Pagination
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={
+                        showDLLFiles
+                          ? getDLLTableData.length
+                          : getQuestionsTableData.length
                       }
-                    : undefined
-                }
-              >
-                <Table<TableItem>
-                  className="!bg-transparent rounded-lg h-full dark:!bg-transparent"
-                  bordered={false}
-                  dataSource={
-                    showDLLFiles ? getDLLTableData : getQuestionsTableData
-                  }
-                  columns={showDLLFiles ? dllColumns : questionsColumns}
-                  scroll={{
-                    x: true,
-                    y: "calc(100vh - 260px)",
-                  }}
-                  pagination={
-                    !viewAll
-                      ? {
-                          pageSize: 10,
-                          position: ["bottomCenter"],
-                        }
-                      : false
-                  }
-                />
-              </ConfigProvider>
-            </div>
-          )}
+                      onChange={(page, size) => {
+                        setCurrentPage(page);
+                        setPageSize(size);
+                      }}
+                      showSizeChanger
+                      showTotal={(total) => (
+                        <div className="w-full h-full hidden md:flex justify-center items-center">
+                          <span className="text-gray-500 dark:text-gray-300">
+                            Total {total} itens
+                          </span>
+                        </div>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+            </ConfigProvider>
+          </div>
         </div>
       </div>
       <ConfigProvider
