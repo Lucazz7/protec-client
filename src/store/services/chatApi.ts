@@ -9,11 +9,21 @@ import {
 } from "../../interface/IChat";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { RootState } from "..";
 import { Chat } from "../../interface/IChat";
 
 export const chatApi = createApi({
   reducerPath: "chatApi",
-  baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${API_URL}`,
+    prepareHeaders: (headers, { getState }) => {
+      const jwt = (getState() as RootState).loginSlice.jwt;
+      if (jwt) {
+        headers.set("authorization", `Bearer ${jwt}`);
+      }
+      return headers;
+    },
+  }),
   tagTypes: ["Chat"],
   endpoints: (builder) => ({
     getChats: builder.query<Chat[], void>({

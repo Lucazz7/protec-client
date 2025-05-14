@@ -2,8 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "antd";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { useLoginMutation } from "../../store/services/loginApi";
 
 const loginSchema = z.object({
   email: z
@@ -22,6 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const [handleLogin, { isLoading }] = useLoginMutation();
 
   const {
     control,
@@ -32,9 +35,18 @@ export default function LoginForm() {
   });
 
   const onSubmit = (data: LoginFormData) => {
-    if (data) {
-      navigate("/");
-    }
+    const response = handleLogin({
+      username: data.email,
+      password: data.password,
+    });
+
+    response.then((res) => {
+      if (res.error) {
+        toast.error("Erro fazer login");
+      } else {
+        navigate("/");
+      }
+    });
   };
 
   return (
@@ -128,6 +140,7 @@ export default function LoginForm() {
             type="primary"
             htmlType="submit"
             size="large"
+            loading={isLoading}
             className="!px-20 !bg-blue-600 hover:!bg-blue-700 uppercase !font-semibold !rounded-full"
           >
             Entrar

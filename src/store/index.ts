@@ -10,15 +10,19 @@ import {
   REHYDRATE,
 } from "redux-persist";
 import chatSlice from "./redux/chatSlice";
+import loginSlice from "./redux/loginSlice";
 import themeSlice from "./redux/themeSlice";
 import { chatApi } from "./services/chatApi";
+import { loginApi } from "./services/loginApi";
 import { trainingFilesApi } from "./services/trainingFilesApi";
 
 export const store = configureStore({
   reducer: {
     chatSlice: chatSlice,
     themeSlice: themeSlice,
+    loginSlice: loginSlice,
     [chatApi.reducerPath]: chatApi.reducer,
+    [loginApi.reducerPath]: loginApi.reducer,
     [trainingFilesApi.reducerPath]: trainingFilesApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -28,6 +32,7 @@ export const store = configureStore({
       },
     })
       .concat(chatApi.middleware)
+      .concat(loginApi.middleware)
       .concat(trainingFilesApi.middleware),
 });
 
